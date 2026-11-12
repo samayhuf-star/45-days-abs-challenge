@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "45 Days Abs Challenge",
+    "slug": "abs-challenge-45",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0A0E17"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.momentum.abscore45"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0A0E17",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "package": "com.momentum.abscore45",
+      "versionCode": 2
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "39a19fc6-2a0f-4fa8-abba-0c4ca5792f4b"
+      }
+    }
+  }
+}
