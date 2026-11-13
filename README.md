@@ -14,6 +14,14 @@ Practical 45-day progressive abs and core challenge app built with Expo / React 
 - Progress calendar
 - Local persistence with AsyncStorage
 - Dark UI
+- No accounts, no ads, no data collection
+
+## Legal
+- Privacy: https://samayhuf-star.github.io/45-days-abs-challenge/privacy/
+- Support: https://samayhuf-star.github.io/45-days-abs-challenge/support/
+
+## Store
+See `store/listing.md` for copy and `store/assets-prompts.md` for icon/screenshot prompts.
 
 ## Run
 ```bash
