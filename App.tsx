@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -80,6 +80,35 @@ const WORKOUTS: Record<number, Workout> = {
   45: { title: 'Final Peak', exercises: ['Bicycle Crunch 5×15/side', 'Leg Raise 5×12', 'Plank 5×45s', 'Mountain Climber 5×25', 'Dead Bug 4×12'], duration: '25 min', rest: '20s', notes: 'You did it. Strong finish.' },
 };
 
+const EXERCISE_VIDEOS: Record<string, string> = {
+  'Dead Bug': 'https://www.youtube.com/results?search_query=dead+bug+exercise+form',
+  'Glute Bridge': 'https://www.youtube.com/results?search_query=glute+bridge+exercise+form',
+  'Bird Dog': 'https://www.youtube.com/results?search_query=bird+dog+exercise+form',
+  'Plank': 'https://www.youtube.com/results?search_query=plank+exercise+proper+form',
+  'Crunch': 'https://www.youtube.com/results?search_query=crunch+exercise+form',
+  'Reverse Crunch': 'https://www.youtube.com/results?search_query=reverse+crunch+exercise+form',
+  'Heel Tap': 'https://www.youtube.com/results?search_query=heel+tap+ab+exercise+form',
+  'Side Plank': 'https://www.youtube.com/results?search_query=side+plank+exercise+form',
+  'Leg Raise': 'https://www.youtube.com/results?search_query=leg+raise+exercise+form',
+  'Bicycle Crunch': 'https://www.youtube.com/results?search_query=bicycle+crunch+exercise+form',
+  'Mountain Climber': 'https://www.youtube.com/results?search_query=mountain+climber+exercise+form',
+  'Cat-Cow': 'https://www.youtube.com/results?search_query=cat+cow+stretch+form',
+};
+
+function getVideoUrl(exercise: string): string | null {
+  for (const key of Object.keys(EXERCISE_VIDEOS)) {
+    if (exercise.toLowerCase().includes(key.toLowerCase())) {
+      return EXERCISE_VIDEOS[key];
+    }
+  }
+  return null;
+}
+
+function parseRestSeconds(rest: string): number {
+  const match = rest.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 30;
+}
+
 function getPhaseForDay(day: number) {
   return PHASES.find(p => day >= p.start && day <= p.end) || PHASES[0];
 }
@@ -89,9 +118,15 @@ export default function App() {
   const [completedDays, setCompletedDays] = useState<number[]>([]);
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [restSeconds, setRestSeconds] = useState(0);
+  const [restActive, setRestActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     loadProgress();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, []);
 
   const loadProgress = async () => {
@@ -119,6 +154,29 @@ export default function App() {
     } catch (e) {
       console.log('Save error', e);
     }
+  };
+
+  const startRestTimer = (seconds: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRestSeconds(seconds);
+    setRestActive(true);
+    timerRef.current = setInterval(() => {
+      setRestSeconds(prev => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setRestActive(false);
+          Alert.alert('Rest over', 'Next set ready.');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const stopRestTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRestActive(false);
+    setRestSeconds(0);
   };
 
   const completeToday = () => {
@@ -164,6 +222,7 @@ export default function App() {
   const progressPercent = Math.round((completedDays.length / TOTAL_DAYS) * 100);
   const todayWorkout = WORKOUTS[currentDay] || WORKOUTS[1];
   const currentPhase = getPhaseForDay(currentDay);
+  const defaultRest = parseRestSeconds(todayWorkout.rest);
 
   if (loading) {
     return (
@@ -252,9 +311,39 @@ export default function App() {
           <Text style={styles.workoutTitle}>Day {currentDay} – {todayWorkout.title}</Text>
           <Text style={styles.workoutMeta}>⏱ {todayWorkout.duration}  •  Rest {todayWorkout.rest}</Text>
           {todayWorkout.notes ? <Text style={styles.workoutNotes}>{todayWorkout.notes}</Text> : null}
-          {todayWorkout.exercises.map((ex, i) => (
-            <Text key={i} style={styles.exerciseItem}>• {ex}</Text>
-          ))}
+
+          {todayWorkout.exercises.map((ex, i) => {
+            const videoUrl = getVideoUrl(ex);
+            return (
+              <View key={i} style={styles.exerciseRow}>
+                <Text style={styles.exerciseItem}>• {ex}</Text>
+                {videoUrl && (
+                  <TouchableOpacity onPress={() => openLink(videoUrl)}>
+                    <Text style={styles.videoLink}>Watch form</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          })}
+
+          <View style={styles.timerRow}>
+            {restActive ? (
+              <>
+                <Text style={styles.timerText}>Rest: {restSeconds}s</Text>
+                <TouchableOpacity style={styles.timerButtonSmall} onPress={stopRestTimer}>
+                  <Text style={styles.timerButtonText}>Stop</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity
+                style={styles.timerButton}
+                onPress={() => startRestTimer(defaultRest)}
+              >
+                <Text style={styles.timerButtonText}>Start {defaultRest}s Rest Timer</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
           <TouchableOpacity
             style={[styles.startButton, completedDays.includes(currentDay) && styles.startButtonDone]}
             onPress={completeToday}
@@ -347,7 +436,19 @@ const styles = StyleSheet.create({
   workoutTitle: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginBottom: 6 },
   workoutMeta: { fontSize: 13, color: '#8B95A7', marginBottom: 8 },
   workoutNotes: { fontSize: 13, color: '#F59E0B', marginBottom: 10, fontStyle: 'italic' },
-  exerciseItem: { fontSize: 14, color: '#CBD5E1', marginBottom: 4, marginLeft: 4 },
+  exerciseRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  exerciseItem: { fontSize: 14, color: '#CBD5E1', flex: 1 },
+  videoLink: { color: '#3B82F6', fontSize: 13, fontWeight: '600', marginLeft: 8 },
+  timerRow: { marginTop: 12, marginBottom: 8 },
+  timerButton: {
+    backgroundColor: '#1E293B', borderRadius: 10, paddingVertical: 12, alignItems: 'center',
+    borderWidth: 1, borderColor: '#3B82F6',
+  },
+  timerButtonSmall: {
+    backgroundColor: '#334155', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 14, marginLeft: 12,
+  },
+  timerButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  timerText: { color: '#F59E0B', fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 8 },
   startButton: {
     backgroundColor: '#3B82F6', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 12,
   },
