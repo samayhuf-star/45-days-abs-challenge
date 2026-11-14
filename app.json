@@ -2,16 +2,18 @@
   "expo": {
     "name": "45 Days Abs Challenge",
     "slug": "abs-challenge-45",
+    "owner": "krosz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "backgroundColor": "#0A0E17"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.momentum.abs45",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": []
       }
@@ -27,6 +29,17 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0A0E17",
+          "image": "./assets/splash.png",
+          "imageWidth": 200
+        }
+      ],
+      "expo-iap"
+    ],
     "extra": {
       "eas": {
         "projectId": "39a19fc6-2a0f-4fa8-abba-0c4ca5792f4b"
