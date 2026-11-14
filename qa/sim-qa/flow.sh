@@ -72,6 +72,11 @@ appId: ${BUNDLE_ID}
       id: "workout-card"
     timeout: 10000
 - takeScreenshot: 03-workout
+- scrollUntilVisible:
+    element:
+      id: "unlock-pro"
+    direction: UP
+    timeout: 15000
 - tapOn:
     id: "unlock-pro"
 - extendedWaitUntil:
