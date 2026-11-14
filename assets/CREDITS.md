@@ -1,33 +1,33 @@
 # Exercise media credits
 
-Files under `assets/exercise-media/` are shown in the app as still frames (two per exercise where available).
+Files under `assets/exercise-media/` are shown in the app as still frames (two per exercise where available). Alt variants (Plank Alt, Dead Bug Alt, Mountain Climber Alt) reuse the base exercise pair.
 
-## Current files
+Primary source: Open Exercise Illustrations (https://github.com/hitmanrepo/open-exercise-illustrations), commit `2786aefa4b36a08faeca8114e0d1eb0af3ef6732`, licence CC0-1.0. Attribution is not required.
 
-The PNGs in this folder are temporary development placeholders drawn as plain name cards. They are not a third-party photo set and are not the shipping media.
+Two works are licensed under CC BY-SA 4.0 and require credit (shown in the app About section):
 
-When the licence-safe photo set is added (candidates to be chosen by another team: wger, Everkinetic, or Wikimedia CC0 / CC-BY), replace the files in place, keep the `exerciseId/0.png` and `exerciseId/1.png` paths used by `src/exerciseMedia.ts`, and fill in the table below.
-
-Do not add images from yuhonas/free-exercise-db. Those images were scraped from other sites and are not cleared for use.
-
-## Credit table (fill in when the real set lands)
+- Plank exercise by Pk0001, Wikimedia Commons, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Plank_exercise.svg (official PNG render used in the app; unmodified SVG kept as `plank/Plank_exercise.svg`)
+- Side plank illustrations by Everkinetic, CC BY-SA 4.0, https://github.com/everkinetic/data (commit `446bb9a3d0c3beb6b84f7c9d77dfc8af707a2ab6`)
 
 | App exercise | exerciseId | File | Source | Licence | Attribution text |
 | --- | --- | --- | --- | --- | --- |
-| Plank | plank | plank/0.png, plank/1.png | TBD | TBD | |
-| Plank Alt | plank-alt | plank-alt/0.png, plank-alt/1.png | TBD | TBD | |
-| Dead Bug | dead-bug | dead-bug/0.png, dead-bug/1.png | TBD | TBD | |
-| Dead Bug Alt | dead-bug-alt | dead-bug-alt/0.png, dead-bug-alt/1.png | TBD | TBD | |
-| Bicycle Crunch | bicycle-crunch | bicycle-crunch/0.png, bicycle-crunch/1.png | TBD | TBD | |
-| Mountain Climber | mountain-climber | mountain-climber/0.png, mountain-climber/1.png | TBD | TBD | |
-| Mountain Climber Alt | mountain-climber-alt | mountain-climber-alt/0.png, mountain-climber-alt/1.png | TBD | TBD | |
-| Side Plank | side-plank | side-plank/0.png, side-plank/1.png | TBD | TBD | |
-| Leg Raise | leg-raise | leg-raise/0.png, leg-raise/1.png | TBD | TBD | |
-| Bird Dog | bird-dog | bird-dog/0.png, bird-dog/1.png | TBD | TBD | |
-| Glute Bridge | glute-bridge | glute-bridge/0.png, glute-bridge/1.png | TBD | TBD | |
-| Reverse Crunch | reverse-crunch | reverse-crunch/0.png, reverse-crunch/1.png | TBD | TBD | |
-| Crunch | crunch | crunch/0.png, crunch/1.png | TBD | TBD | |
-| Heel Tap | heel-tap | heel-tap/0.png, heel-tap/1.png | TBD | TBD | |
-| Cat-Cow | cat-cow | cat-cow/0.png, cat-cow/1.png | TBD | TBD | |
+| Plank | plank | plank/0.png | Open Exercise Illustrations, `images/plank/hold.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/blob/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/plank/hold.webp | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Plank | plank | plank/1.png | Wikimedia Commons, official PNG render of File:Plank_exercise.svg, https://commons.wikimedia.org/wiki/File:Plank_exercise.svg | CC-BY-SA-4.0 | Plank exercise by Pk0001, Wikimedia Commons, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Plank_exercise.svg |
+| Plank | plank | plank/Plank_exercise.svg | Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Plank_exercise.svg (unmodified original SVG; not shown in the app) | CC-BY-SA-4.0 | Plank exercise by Pk0001, Wikimedia Commons, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Plank_exercise.svg |
+| Dead Bug | dead-bug | dead-bug/0.png, dead-bug/1.png | Open Exercise Illustrations, `images/dead-bug/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/dead-bug | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Bicycle Crunch | bicycle-crunch | bicycle-crunch/0.png, bicycle-crunch/1.png | Open Exercise Illustrations, `images/bicycle-crunch/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/bicycle-crunch | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Mountain Climber | mountain-climber | mountain-climber/0.png, mountain-climber/1.png | Open Exercise Illustrations, `images/mountain-climbers/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/mountain-climbers | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Side Plank | side-plank | side-plank/0.png | Open Exercise Illustrations, `images/side-plank/hold.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/blob/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/side-plank/hold.webp (used instead of a near-duplicate Everkinetic still, because the hold frame is a clearer, distinct pose) | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Side Plank | side-plank | side-plank/1.png | Everkinetic, `src/images-web/side-plank-1.png`, https://github.com/everkinetic/data/blob/446bb9a3d0c3beb6b84f7c9d77dfc8af707a2ab6/src/images-web/side-plank-1.png | CC-BY-SA-4.0 | Side plank illustrations by Everkinetic, CC BY-SA 4.0, https://github.com/everkinetic/data |
+| Leg Raise | leg-raise | leg-raise/0.png, leg-raise/1.png | Open Exercise Illustrations, `images/leg-raises/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/leg-raises | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Bird Dog | bird-dog | bird-dog/0.png, bird-dog/1.png | Open Exercise Illustrations, `images/bird-dog/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/bird-dog | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Glute Bridge | glute-bridge | glute-bridge/0.png, glute-bridge/1.png | Open Exercise Illustrations, `images/glute-bridge/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/glute-bridge | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Reverse Crunch | reverse-crunch | reverse-crunch/0.png, reverse-crunch/1.png | Open Exercise Illustrations, `images/reverse-crunch/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/reverse-crunch | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Crunch | crunch | crunch/0.png, crunch/1.png | Open Exercise Illustrations, `images/crunches/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/crunches | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Heel Tap | heel-tap | heel-tap/0.png, heel-tap/1.png | Open Exercise Illustrations, `images/heel-taps/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/heel-taps | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Cat-Cow | cat-cow | cat-cow/0.png, cat-cow/1.png | Open Exercise Illustrations, `images/cat-cow/start.webp` and `end.webp`, https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/images/cat-cow | CC0-1.0 | Open Exercise Illustrations. Dedicated to the public domain under CC0 1.0. Attribution is not required. |
+| Plank Alt | plank-alt | (reuses plank/0.png and plank/1.png) | See Plank | See Plank | See Plank |
+| Dead Bug Alt | dead-bug-alt | (reuses dead-bug/0.png and dead-bug/1.png) | See Dead Bug | See Dead Bug | See Dead Bug |
+| Mountain Climber Alt | mountain-climber-alt | (reuses mountain-climber/0.png and mountain-climber/1.png) | See Mountain Climber | See Mountain Climber | See Mountain Climber |
 
-If the chosen licence is CC-BY, put the required credit in the Attribution column and set `CREDIT_LINE` in `src/exerciseMedia.ts` so the About screen can show it. CC0 needs no in-app credit.
+CC0 files were converted from webp to png for the app path names only. The CC BY-SA files (`plank/1.png`, `plank/Plank_exercise.svg`, and `side-plank/1.png`) are unmodified copies of the upstream files.

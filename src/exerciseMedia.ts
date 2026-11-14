@@ -37,8 +37,8 @@ export const EXERCISE_ID_BY_KEY: Record<string, ExerciseId> = {
 
 /**
  * exerciseId -> ordered still frames under assets/exercise-media/.
- * Replace the placeholder PNGs in place (keep 0.png / 1.png names) when the
- * licence-safe set is ready. No network URLs.
+ * Stills live under assets/exercise-media/<exerciseId>/{0,1}.png.
+ * Alt variants reuse the base exercise pair. No network URLs.
  */
 export const EXERCISE_MEDIA: Record<ExerciseId, any[]> = {
   plank: [
@@ -46,16 +46,16 @@ export const EXERCISE_MEDIA: Record<ExerciseId, any[]> = {
     require('../assets/exercise-media/plank/1.png'),
   ],
   'plank-alt': [
-    require('../assets/exercise-media/plank-alt/0.png'),
-    require('../assets/exercise-media/plank-alt/1.png'),
+    require('../assets/exercise-media/plank/0.png'),
+    require('../assets/exercise-media/plank/1.png'),
   ],
   'dead-bug': [
     require('../assets/exercise-media/dead-bug/0.png'),
     require('../assets/exercise-media/dead-bug/1.png'),
   ],
   'dead-bug-alt': [
-    require('../assets/exercise-media/dead-bug-alt/0.png'),
-    require('../assets/exercise-media/dead-bug-alt/1.png'),
+    require('../assets/exercise-media/dead-bug/0.png'),
+    require('../assets/exercise-media/dead-bug/1.png'),
   ],
   'bicycle-crunch': [
     require('../assets/exercise-media/bicycle-crunch/0.png'),
@@ -66,8 +66,8 @@ export const EXERCISE_MEDIA: Record<ExerciseId, any[]> = {
     require('../assets/exercise-media/mountain-climber/1.png'),
   ],
   'mountain-climber-alt': [
-    require('../assets/exercise-media/mountain-climber-alt/0.png'),
-    require('../assets/exercise-media/mountain-climber-alt/1.png'),
+    require('../assets/exercise-media/mountain-climber/0.png'),
+    require('../assets/exercise-media/mountain-climber/1.png'),
   ],
   'side-plank': [
     require('../assets/exercise-media/side-plank/0.png'),
@@ -103,8 +103,11 @@ export const EXERCISE_MEDIA: Record<ExerciseId, any[]> = {
   ],
 };
 
-/** Set this when a CC-BY set is dropped in; leave empty for CC0 or placeholders. */
-export const CREDIT_LINE = 'Form photos are temporary development placeholders.';
+/** Required in-app credit lines, shown on the About screen. */
+export const CREDIT_LINE =
+  'Plank exercise by Pk0001, Wikimedia Commons, CC BY-SA 4.0, https://commons.wikimedia.org/wiki/File:Plank_exercise.svg\n' +
+  'Side plank illustrations by Everkinetic, CC BY-SA 4.0, https://github.com/everkinetic/data\n' +
+  'Other illustrations: Open Exercise Illustrations, CC0';
 
 export function mediaForExercise(exercise: string): any[] {
   const key = exerciseKeyFor(exercise);
