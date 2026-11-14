@@ -1,0 +1,94 @@
+{
+  "identifier": "Abs45",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "39.99",
+      "familyShareable": false,
+      "internalID": "7AE1BB91-8664-4895-8685-7336B3689BA1",
+      "localizations": [
+        {
+          "description": "Lifetime access to the full 45-day plan",
+          "displayName": "Lifetime",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.momentum.abs45.lifetime",
+      "referenceName": "Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "0",
+    "_developerTeamID": ""
+  },
+  "subscriptionGroups": [
+    {
+      "id": "BF6B69BF-074F-4F2A-B45F-B92DF1A48CF7",
+      "localizations": [
+        {
+          "description": "Pro access",
+          "displayName": "Pro",
+          "locale": "en_US"
+        }
+      ],
+      "name": "Pro",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "2.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "514439B8-552D-4484-B3EA-BE80A8B40D6C",
+          "introductoryOffer": {
+            "displayPrice": "0",
+            "internalID": "8E19A253-4811-4C8E-960C-BAD09F35E628",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
+          },
+          "localizations": [
+            {
+              "description": "Monthly Pro with a 7-day free trial",
+              "displayName": "Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.momentum.abs45.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Monthly",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "19.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "6E5309E6-8CCE-40A0-9731-995B47694C81",
+          "introductoryOffer": {
+            "displayPrice": "0",
+            "internalID": "FC54780B-C076-4BD3-A680-1BB330D94D11",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
+          },
+          "localizations": [
+            {
+              "description": "Yearly Pro with a 7-day free trial",
+              "displayName": "Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.momentum.abs45.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Yearly",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}

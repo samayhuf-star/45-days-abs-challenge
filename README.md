@@ -18,7 +18,11 @@ Practical 45-day progressive abs and core challenge app built with Expo / React 
 
 ## Legal
 - Privacy: https://samayhuf-star.github.io/45-days-abs-challenge/privacy/
+- Terms: https://samayhuf-star.github.io/45-days-abs-challenge/terms/
 - Support: https://samayhuf-star.github.io/45-days-abs-challenge/support/
+- Contact: Samay Vashsht, samayhuf@gmail.com
+
+Days 1 to 7 are free. Later days require Pro (monthly, yearly, or lifetime).
 
 ## Store
 See `store/listing.md` for copy and `store/assets-prompts.md` for icon/screenshot prompts.

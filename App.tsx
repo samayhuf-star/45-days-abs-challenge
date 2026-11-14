@@ -16,118 +16,29 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video, ResizeMode } from 'expo-av';
 
+import { IapProvider, useIapContext } from './src/IapProvider';
+import { Paywall } from './src/Paywall';
+import { PRIVACY_URL, SUPPORT_URL, TERMS_URL } from './src/products';
+import { getVideoSource } from './src/videos';
+import {
+  PHASES,
+  TOTAL_DAYS,
+  WORKOUTS,
+  estimateSets,
+  getPhaseForDay,
+  isDayUnlocked,
+  parseRestSeconds,
+} from './src/workouts';
+
 const { width } = Dimensions.get('window');
-const TOTAL_DAYS = 45;
 const STORAGE_KEY = '@abs_challenge_progress_v3';
 const THEME_KEY = '@abs_challenge_theme';
-
-const PHASES = [
-  { name: 'Foundation', days: '1–10', focus: 'Form & Activation', color: '#3B82F6', start: 1, end: 10 },
-  { name: 'Build', days: '11–25', focus: 'Strength & Volume', color: '#8B5CF6', start: 11, end: 25 },
-  { name: 'Intensify', days: '26–40', focus: 'Density & Control', color: '#F59E0B', start: 26, end: 40 },
-  { name: 'Peak', days: '41–45', focus: 'Finish Strong', color: '#EF4444', start: 41, end: 45 },
-];
-
 const ACCENT_OPTIONS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
-type Workout = {
-  title: string;
-  exercises: string[];
-  duration: string;
-  rest: string;
-  notes?: string;
-};
-
-const WORKOUTS: Record<number, Workout> = {
-  1: { title: 'Core Activation', exercises: ['Dead Bug 3×10', 'Glute Bridge 3×12', 'Bird Dog 3×8/side', 'Plank 3×20s'], duration: '12 min', rest: '45s' },
-  2: { title: 'Crunch Foundations', exercises: ['Crunch 3×12', 'Reverse Crunch 3×10', 'Heel Tap 3×12/side', 'Plank 3×25s'], duration: '14 min', rest: '45s' },
-  3: { title: 'Stability Basics', exercises: ['Dead Bug 3×12', 'Side Plank 3×15s/side', 'Bird Dog 3×10/side', 'Glute Bridge 3×15'], duration: '13 min', rest: '45s' },
-  4: { title: 'Lower Abs Intro', exercises: ['Reverse Crunch 3×12', 'Heel Tap 3×15/side', 'Leg Raise (bent) 3×8', 'Plank 3×30s'], duration: '14 min', rest: '45s' },
-  5: { title: 'Active Recovery', exercises: ['Cat-Cow 2×10', 'Bird Dog 2×8/side', 'Dead Bug 2×10', 'Gentle Plank 2×20s'], duration: '10 min', rest: '60s', notes: 'Light day – focus on form' },
-  6: { title: 'Core Control', exercises: ['Dead Bug 3×12', 'Plank 3×30s', 'Bird Dog 3×10/side', 'Heel Tap 3×12/side'], duration: '15 min', rest: '40s' },
-  7: { title: 'Crunch Progress', exercises: ['Crunch 3×15', 'Reverse Crunch 3×12', 'Side Plank 3×20s/side', 'Glute Bridge 3×15'], duration: '15 min', rest: '40s' },
-  8: { title: 'Foundation Mix', exercises: ['Dead Bug 3×15', 'Leg Raise 3×10', 'Plank 3×35s', 'Bird Dog 3×10/side'], duration: '16 min', rest: '40s' },
-  9: { title: 'Endurance Base', exercises: ['Plank 3×40s', 'Crunch 3×15', 'Reverse Crunch 3×12', 'Side Plank 3×25s/side'], duration: '16 min', rest: '40s' },
-  10: { title: 'Foundation Test', exercises: ['Dead Bug 4×12', 'Plank 4×30s', 'Bird Dog 3×12/side', 'Glute Bridge 3×15'], duration: '18 min', rest: '45s' },
-  11: { title: 'Volume Increase', exercises: ['Bicycle Crunch 3×12/side', 'Mountain Climber 3×20', 'Leg Raise 3×10', 'Plank 3×40s'], duration: '16 min', rest: '35s' },
-  12: { title: 'Core Builder', exercises: ['Bicycle Crunch 3×15/side', 'Mountain Climber 3×25', 'Leg Raise 3×12', 'Side Plank 3×25s/side'], duration: '17 min', rest: '35s' },
-  13: { title: 'Strength Focus', exercises: ['Leg Raise 4×10', 'Crunch 3×15', 'Plank 3×45s', 'Bird Dog 3×12/side'], duration: '17 min', rest: '35s' },
-  14: { title: 'Density Day', exercises: ['Mountain Climber 4×20', 'Reverse Crunch 3×15', 'Side Plank 3×30s/side', 'Dead Bug 3×12'], duration: '18 min', rest: '30s' },
-  15: { title: 'Active Recovery', exercises: ['Dead Bug 2×12', 'Bird Dog 2×10/side', 'Glute Bridge 2×15', 'Plank 2×25s'], duration: '12 min', rest: '60s', notes: 'Recovery – keep it light' },
-  16: { title: 'Build Phase', exercises: ['Bicycle Crunch 4×12/side', 'Leg Raise 3×12', 'Mountain Climber 3×30', 'Plank 3×45s'], duration: '18 min', rest: '30s' },
-  17: { title: 'Oblique Emphasis', exercises: ['Side Plank 3×35s/side', 'Bicycle Crunch 3×15/side', 'Heel Tap 3×15/side', 'Mountain Climber 3×25'], duration: '17 min', rest: '35s' },
-  18: { title: 'Volume Push', exercises: ['Crunch 4×15', 'Leg Raise 4×10', 'Plank 4×35s', 'Bird Dog 3×12/side'], duration: '19 min', rest: '30s' },
-  19: { title: 'Control & Density', exercises: ['Dead Bug 4×12', 'Mountain Climber 4×20', 'Reverse Crunch 3×15', 'Side Plank 3×30s/side'], duration: '18 min', rest: '30s' },
-  20: { title: 'Mid-Build Test', exercises: ['Bicycle Crunch 4×12/side', 'Leg Raise 3×12', 'Plank 3×50s', 'Mountain Climber 3×30'], duration: '20 min', rest: '35s' },
-  21: { title: 'Strength Builder', exercises: ['Leg Raise 4×12', 'Crunch 3×18', 'Side Plank 3×35s/side', 'Dead Bug 3×15'], duration: '18 min', rest: '30s' },
-  22: { title: 'High Density', exercises: ['Mountain Climber 4×25', 'Bicycle Crunch 3×15/side', 'Plank 3×45s', 'Reverse Crunch 3×15'], duration: '19 min', rest: '25s' },
-  23: { title: 'Build Mix', exercises: ['Dead Bug 4×12', 'Leg Raise 3×12', 'Side Plank 4×25s/side', 'Mountain Climber 3×25'], duration: '19 min', rest: '30s' },
-  24: { title: 'Volume Peak', exercises: ['Bicycle Crunch 4×15/side', 'Crunch 4×15', 'Plank 4×40s', 'Bird Dog 3×12/side'], duration: '20 min', rest: '30s' },
-  25: { title: 'Build Finale', exercises: ['Leg Raise 4×12', 'Mountain Climber 4×25', 'Side Plank 3×40s/side', 'Dead Bug 4×12'], duration: '21 min', rest: '30s' },
-  26: { title: 'Density Start', exercises: ['Mountain Climber 5×20', 'Bicycle Crunch 4×12/side', 'Leg Raise 4×10', 'Plank 4×40s'], duration: '20 min', rest: '25s' },
-  27: { title: 'Control Focus', exercises: ['Dead Bug 4×15', 'Side Plank 4×30s/side', 'Reverse Crunch 4×12', 'Bird Dog 4×10/side'], duration: '20 min', rest: '25s' },
-  28: { title: 'Intensify Mix', exercises: ['Leg Raise 5×10', 'Mountain Climber 4×25', 'Crunch 4×15', 'Plank 4×45s'], duration: '21 min', rest: '20s' },
-  29: { title: 'High Volume', exercises: ['Bicycle Crunch 5×12/side', 'Reverse Crunch 4×15', 'Side Plank 4×30s/side', 'Dead Bug 4×12'], duration: '21 min', rest: '25s' },
-  30: { title: 'Active Recovery', exercises: ['Bird Dog 3×10/side', 'Dead Bug 3×12', 'Plank 3×30s', 'Glute Bridge 3×12'], duration: '12 min', rest: '45s', notes: 'Recovery day' },
-  31: { title: 'Peak Density', exercises: ['Mountain Climber 5×25', 'Leg Raise 4×12', 'Bicycle Crunch 4×15/side', 'Plank 4×50s'], duration: '22 min', rest: '20s' },
-  32: { title: 'Oblique Density', exercises: ['Side Plank 5×30s/side', 'Bicycle Crunch 4×15/side', 'Heel Tap 4×15/side', 'Mountain Climber 4×25'], duration: '21 min', rest: '20s' },
-  33: { title: 'Strength Density', exercises: ['Leg Raise 5×12', 'Crunch 4×18', 'Dead Bug 4×15', 'Plank 5×35s'], duration: '22 min', rest: '20s' },
-  34: { title: 'Intensify Push', exercises: ['Mountain Climber 5×25', 'Reverse Crunch 4×15', 'Side Plank 4×35s/side', 'Bird Dog 4×12/side'], duration: '22 min', rest: '20s' },
-  35: { title: 'Mid-Intensify', exercises: ['Bicycle Crunch 5×15/side', 'Leg Raise 4×12', 'Plank 5×40s', 'Dead Bug 4×15'], duration: '23 min', rest: '20s' },
-  36: { title: 'Control Peak', exercises: ['Dead Bug 5×12', 'Side Plank 5×30s/side', 'Reverse Crunch 5×12', 'Mountain Climber 4×25'], duration: '22 min', rest: '20s' },
-  37: { title: 'Volume Density', exercises: ['Crunch 5×15', 'Leg Raise 5×10', 'Bicycle Crunch 4×15/side', 'Plank 5×40s'], duration: '23 min', rest: '20s' },
-  38: { title: 'High Intensity', exercises: ['Mountain Climber 6×20', 'Side Plank 4×40s/side', 'Reverse Crunch 4×15', 'Dead Bug 5×12'], duration: '23 min', rest: '15s' },
-  39: { title: 'Intensify Finale', exercises: ['Leg Raise 5×12', 'Bicycle Crunch 5×12/side', 'Plank 5×45s', 'Bird Dog 4×12/side'], duration: '24 min', rest: '20s' },
-  40: { title: 'Pre-Peak Test', exercises: ['Mountain Climber 5×25', 'Leg Raise 5×12', 'Side Plank 5×30s/side', 'Dead Bug 5×12'], duration: '24 min', rest: '20s' },
-  41: { title: 'Peak Start', exercises: ['Bicycle Crunch 5×15/side', 'Mountain Climber 5×25', 'Leg Raise 5×12', 'Plank 5×45s'], duration: '22 min', rest: '20s' },
-  42: { title: 'Peak Density', exercises: ['Side Plank 5×35s/side', 'Dead Bug 5×15', 'Reverse Crunch 5×12', 'Mountain Climber 5×25'], duration: '23 min', rest: '15s' },
-  43: { title: 'Peak Control', exercises: ['Leg Raise 5×15', 'Bicycle Crunch 5×15/side', 'Plank 5×50s', 'Bird Dog 5×10/side'], duration: '23 min', rest: '15s' },
-  44: { title: 'Peak Push', exercises: ['Mountain Climber 6×20', 'Crunch 5×15', 'Side Plank 5×30s/side', 'Dead Bug 5×12'], duration: '22 min', rest: '15s' },
-  45: { title: 'Final Peak', exercises: ['Bicycle Crunch 5×15/side', 'Leg Raise 5×12', 'Plank 5×45s', 'Mountain Climber 5×25', 'Dead Bug 4×12'], duration: '25 min', rest: '20s', notes: 'You did it. Strong finish.' },
-};
-
-const EXERCISE_VIDEOS: Record<string, any> = {
-  'Dead Bug': require('./assets/videos/deadbug.mp4'),
-  'Plank': require('./assets/videos/plank.mp4'),
-  'Bicycle Crunch': require('./assets/videos/bicycle.mp4'),
-  'Mountain Climber': require('./assets/videos/mountain.mp4'),
-  'Side Plank': require('./assets/videos/sideplank.mp4'),
-  'Leg Raise': require('./assets/videos/legraise.mp4'),
-  'Bird Dog': require('./assets/videos/birddog.mp4'),
-  'Glute Bridge': require('./assets/videos/glutebridge.mp4'),
-  'Reverse Crunch': require('./assets/videos/reversecrunch.mp4'),
-  'Crunch': require('./assets/videos/crunch.mp4'),
-  'Heel Tap': require('./assets/videos/heeltap.mp4'),
-  'Cat-Cow': require('./assets/videos/catcow.mp4'),
-};
-
-function getVideoUrl(exercise: string): any | null {
-  for (const key of Object.keys(EXERCISE_VIDEOS)) {
-    if (exercise.toLowerCase().includes(key.toLowerCase())) {
-      return EXERCISE_VIDEOS[key];
-    }
-  }
-  return null;
-}
-
-function parseRestSeconds(rest: string): number {
-  const match = rest.match(/(\d+)/);
-  return match ? parseInt(match[1], 10) : 30;
-}
-
-function getPhaseForDay(day: number) {
-  return PHASES.find(p => day >= p.start && day <= p.end) || PHASES[0];
-}
-
-function estimateSets(exercises: string[]): number {
-  return exercises.reduce((sum, ex) => {
-    const m = ex.match(/(\d+)×/);
-    return sum + (m ? parseInt(m[1], 10) : 1);
-  }, 0);
-}
-
-export default function App() {
+function AppInner() {
+  const iap = useIapContext();
   const [currentDay, setCurrentDay] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(1);
   const [completedDays, setCompletedDays] = useState<number[]>([]);
   const [streak, setStreak] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -136,6 +47,7 @@ export default function App() {
   const [activeVideo, setActiveVideo] = useState<any>(null);
   const [isDark, setIsDark] = useState(true);
   const [accent, setAccent] = useState('#3B82F6');
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -167,8 +79,10 @@ export default function App() {
       const data = await AsyncStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);
+        const loadedDay = parsed.currentDay || 1;
         setCompletedDays(parsed.completedDays || []);
-        setCurrentDay(parsed.currentDay || 1);
+        setCurrentDay(loadedDay);
+        setSelectedDay(loadedDay);
         setStreak(parsed.streak || 0);
       }
     } catch (e) {
@@ -194,7 +108,7 @@ export default function App() {
     setRestSeconds(seconds);
     setRestActive(true);
     timerRef.current = setInterval(() => {
-      setRestSeconds(prev => {
+      setRestSeconds((prev) => {
         if (prev <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
           setRestActive(false);
@@ -220,6 +134,10 @@ export default function App() {
   };
 
   const completeToday = () => {
+    if (!isDayUnlocked(currentDay, iap.isPro)) {
+      setPaywallOpen(true);
+      return;
+    }
     if (completedDays.includes(currentDay)) {
       Alert.alert('Already done', "You already completed today's workout.");
       return;
@@ -230,11 +148,13 @@ export default function App() {
     const newStreak = streak + 1;
     setCompletedDays(newCompleted);
     setCurrentDay(nextDay);
+    setSelectedDay(nextDay);
     setStreak(newStreak);
     saveProgress(newCompleted, nextDay, newStreak);
-    const msg = currentDay === TOTAL_DAYS
-      ? 'Challenge complete! You finished all 45 days. 🎉'
-      : `Day ${currentDay} complete. Keep the streak going! 🔥`;
+    const msg =
+      currentDay === TOTAL_DAYS
+        ? 'Challenge complete. You finished all 45 days.'
+        : `Day ${currentDay} complete. Keep the streak going.`;
     Alert.alert('Great job!', msg);
   };
 
@@ -250,6 +170,7 @@ export default function App() {
           onPress: async () => {
             setCompletedDays([]);
             setCurrentDay(1);
+            setSelectedDay(1);
             setStreak(0);
             await AsyncStorage.removeItem(STORAGE_KEY);
           },
@@ -260,14 +181,20 @@ export default function App() {
 
   const openLink = (url: string) => Linking.openURL(url).catch(() => {});
 
+  const selectDay = (day: number) => {
+    setSelectedDay(day);
+    if (!isDayUnlocked(day, iap.isPro)) {
+      setPaywallOpen(true);
+    }
+  };
+
   const progressPercent = Math.round((completedDays.length / TOTAL_DAYS) * 100);
-  const todayWorkout = WORKOUTS[currentDay] || WORKOUTS[1];
-  const currentPhase = getPhaseForDay(currentDay);
+  const todayWorkout = WORKOUTS[selectedDay] || WORKOUTS[currentDay] || WORKOUTS[1];
+  const currentPhase = getPhaseForDay(selectedDay);
   const defaultRest = parseRestSeconds(todayWorkout.rest);
   const setsToday = estimateSets(todayWorkout.exercises);
-  const weekMinutes = Math.round(
-    completedDays.filter(d => d > currentDay - 7).length * 16
-  );
+  const weekMinutes = Math.round(completedDays.filter((d) => d > currentDay - 7).length * 16);
+  const unlocked = isDayUnlocked(selectedDay, iap.isPro);
 
   const colors = {
     bg: isDark ? '#0E1514' : '#F8FAFC',
@@ -280,20 +207,25 @@ export default function App() {
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-        <Text style={[styles.loadingText, { color: colors.text }]}>Loading...</Text>
+        <Text style={[styles.loadingText, { color: colors.text }]}>Loading</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
+    <SafeAreaView testID="home-screen" style={[styles.container, { backgroundColor: colors.bg }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} testID="home-scroll">
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>45 Days Abs Challenge</Text>
             <Text style={[styles.headerSubtitle, { color: colors.sub }]}>Practical. Progressive. Sustainable.</Text>
           </View>
+          {!iap.isPro && (
+            <TouchableOpacity testID="unlock-pro" onPress={() => setPaywallOpen(true)} style={styles.unlockBtn}>
+              <Text style={[styles.unlockBtnText, { color: accent }]}>Pro</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
               const next = !isDark;
@@ -307,10 +239,13 @@ export default function App() {
         </View>
 
         <View style={styles.accentRow}>
-          {ACCENT_OPTIONS.map(c => (
+          {ACCENT_OPTIONS.map((c) => (
             <TouchableOpacity
               key={c}
-              onPress={() => { setAccent(c); saveTheme(isDark, c); }}
+              onPress={() => {
+                setAccent(c);
+                saveTheme(isDark, c);
+              }}
               style={[styles.accentDot, { backgroundColor: c }, accent === c && styles.accentDotActive]}
             />
           ))}
@@ -350,15 +285,25 @@ export default function App() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Your 45-Day Plan</Text>
           <Text style={[styles.phaseIntro, { color: colors.sub }]}>
-            Progressive overload across 4 phases. Form first, then volume, then density.
+            Progressive work across 4 phases. Form first, then volume, then density.
           </Text>
           {PHASES.map((phase, index) => {
             const active = phase.name === currentPhase.name;
             return (
-              <View key={index} style={[styles.phaseRow, { backgroundColor: colors.card, borderColor: colors.border }, active && { borderColor: accent }]}>
+              <View
+                key={index}
+                style={[
+                  styles.phaseRow,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                  active && { borderColor: accent },
+                ]}
+              >
                 <View style={[styles.phaseDot, { backgroundColor: phase.color }]} />
                 <View style={styles.phaseInfo}>
-                  <Text style={[styles.phaseName, { color: colors.text }]}>{phase.name}{active ? '  •  Current' : ''}</Text>
+                  <Text style={[styles.phaseName, { color: colors.text }]}>
+                    {phase.name}
+                    {active ? '  •  Current' : ''}
+                  </Text>
                   <Text style={[styles.phaseDays, { color: colors.sub }]}>Days {phase.days}</Text>
                 </View>
                 <Text style={[styles.phaseFocus, { color: colors.sub }]}>{phase.focus}</Text>
@@ -367,107 +312,159 @@ export default function App() {
           })}
         </View>
 
-        <View style={styles.section}>
+        <View testID="progress-section" style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Progress</Text>
-            <Text style={[styles.dayCounter, { color: colors.sub }]}>Day {currentDay} of {TOTAL_DAYS}</Text>
+            <Text style={[styles.dayCounter, { color: colors.sub }]}>
+              Day {currentDay} of {TOTAL_DAYS}
+            </Text>
           </View>
-          <View style={styles.calendarGrid}>
+          <View testID="calendar-grid" style={styles.calendarGrid}>
             {Array.from({ length: TOTAL_DAYS }, (_, i) => {
               const day = i + 1;
               const isCompleted = completedDays.includes(day);
               const isToday = day === currentDay && !isCompleted;
+              const isSelected = day === selectedDay;
               const phase = getPhaseForDay(day);
+              const locked = !isDayUnlocked(day, iap.isPro);
               return (
-                <View
+                <TouchableOpacity
                   key={day}
+                  testID={`calendar-day-${day}`}
+                  onPress={() => selectDay(day)}
                   style={[
                     styles.dayBox,
                     { backgroundColor: colors.card, borderColor: colors.border },
                     isCompleted && { backgroundColor: phase.color, borderColor: phase.color },
                     isToday && { borderColor: accent, borderWidth: 2 },
+                    isSelected && !isCompleted && { borderColor: accent, borderWidth: 2 },
+                    locked && { opacity: 0.55 },
                   ]}
                 >
                   <Text style={[styles.dayText, { color: isCompleted || isToday ? '#fff' : colors.sub }]}>
-                    {isCompleted ? '✓' : day}
+                    {isCompleted ? '✓' : locked ? '🔒' : day}
                   </Text>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
         </View>
 
-        <View style={[styles.workoutCard, { backgroundColor: colors.card }]}>
-          <Text style={[styles.workoutLabel, { color: accent }]}>TODAY'S WORKOUT</Text>
-          <Text style={[styles.workoutTitle, { color: colors.text }]}>Day {currentDay} – {todayWorkout.title}</Text>
-          <Text style={[styles.workoutMeta, { color: colors.sub }]}>⏱ {todayWorkout.duration}  •  Rest {todayWorkout.rest}</Text>
+        <View testID="workout-card" style={[styles.workoutCard, { backgroundColor: colors.card }]}>
+          <Text style={[styles.workoutLabel, { color: accent }]}>
+            {selectedDay === currentDay ? "TODAY'S WORKOUT" : `DAY ${selectedDay}`}
+          </Text>
+          <Text style={[styles.workoutTitle, { color: colors.text }]}>
+            Day {selectedDay} – {todayWorkout.title}
+          </Text>
+          <Text style={[styles.workoutMeta, { color: colors.sub }]}>
+            ⏱ {todayWorkout.duration}  •  Rest {todayWorkout.rest}
+          </Text>
           {todayWorkout.notes ? <Text style={[styles.workoutNotes, { color: '#F59E0B' }]}>{todayWorkout.notes}</Text> : null}
 
-          {todayWorkout.exercises.map((ex, i) => {
-            const videoSource = getVideoUrl(ex);
-            return (
-              <View key={i} style={[styles.exerciseCard, { backgroundColor: isDark ? '#0F172A' : '#F1F5F9', borderColor: colors.border }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.exerciseTitle, { color: colors.text }]}>{ex}</Text>
-                  <Text style={[styles.exerciseSub, { color: colors.sub }]}>Tap to watch form</Text>
-                </View>
-                {videoSource && (
-                  <TouchableOpacity
-                    style={[styles.watchBtn, { backgroundColor: accent }]}
-                    onPress={() => setActiveVideo(videoSource)}
+          {!unlocked ? (
+            <View testID="locked-workout">
+              <Text style={[styles.lockedCopy, { color: colors.sub }]}>
+                This day is in the Pro plan. Days 1 to 7 stay free.
+              </Text>
+              <TouchableOpacity
+                testID="unlock-pro-workout"
+                onPress={() => setPaywallOpen(true)}
+                style={[styles.startButton, { backgroundColor: accent }]}
+              >
+                <Text style={styles.startButtonText}>Unlock Pro</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {todayWorkout.exercises.map((ex, i) => {
+                const videoSource = getVideoSource(ex);
+                return (
+                  <View
+                    key={i}
+                    style={[
+                      styles.exerciseCard,
+                      { backgroundColor: isDark ? '#0F172A' : '#F1F5F9', borderColor: colors.border },
+                    ]}
                   >
-                    <Text style={styles.watchBtnText}>▶ Form</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.exerciseTitle, { color: colors.text }]}>{ex}</Text>
+                      <Text style={[styles.exerciseSub, { color: colors.sub }]}>Tap to watch form</Text>
+                    </View>
+                    {videoSource && (
+                      <TouchableOpacity
+                        style={[styles.watchBtn, { backgroundColor: accent }]}
+                        onPress={() => setActiveVideo(videoSource)}
+                      >
+                        <Text style={styles.watchBtnText}>▶ Form</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })}
+
+              <View style={styles.timerSection}>
+                {restActive ? (
+                  <View style={styles.timerActive}>
+                    <Text style={[styles.timerBig, { color: accent }]}>{restSeconds}</Text>
+                    <Text style={[styles.timerLabel, { color: colors.sub }]}>seconds rest</Text>
+                    <View style={styles.timerBarBg}>
+                      <View
+                        style={[
+                          styles.timerBarFill,
+                          { backgroundColor: accent, width: `${Math.max(0, (restSeconds / defaultRest) * 100)}%` },
+                        ]}
+                      />
+                    </View>
+                    <TouchableOpacity style={styles.stopBtn} onPress={stopRestTimer}>
+                      <Text style={styles.stopBtnText}>Stop</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.timerStartBtn, { borderColor: accent }]}
+                    onPress={() => startRestTimer(defaultRest)}
+                  >
+                    <Text style={[styles.timerStartText, { color: accent }]}>Start {defaultRest}s rest</Text>
                   </TouchableOpacity>
                 )}
               </View>
-            );
-          })}
 
-          <View style={styles.timerSection}>
-            {restActive ? (
-              <View style={styles.timerActive}>
-                <Text style={[styles.timerBig, { color: accent }]}>{restSeconds}</Text>
-                <Text style={[styles.timerLabel, { color: colors.sub }]}>seconds rest</Text>
-                <View style={styles.timerBarBg}>
-                  <View style={[styles.timerBarFill, { width: `${(restSeconds / defaultRest) * 100}%`, backgroundColor: accent }]} />
-                </View>
-                <TouchableOpacity style={styles.stopBtn} onPress={stopRestTimer}>
-                  <Text style={styles.stopBtnText}>Stop</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity
-                style={[styles.timerStartBtn, { borderColor: accent }]}
-                onPress={() => startRestTimer(defaultRest)}
-              >
-                <Text style={[styles.timerStartText, { color: accent }]}>Start {defaultRest}s Rest Timer</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <TouchableOpacity
-              style={[styles.startButton, { backgroundColor: accent }, completedDays.includes(currentDay) && styles.startButtonDone]}
-              onPress={completeToday}
-              disabled={completedDays.includes(currentDay)}
-            >
-              <Text style={styles.startButtonText}>
-                {completedDays.includes(currentDay) ? 'Completed ✓' : 'Mark Complete'}
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+              {selectedDay === currentDay && (
+                <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                  <TouchableOpacity
+                    testID="mark-complete"
+                    style={[
+                      styles.startButton,
+                      { backgroundColor: accent },
+                      completedDays.includes(currentDay) && styles.startButtonDone,
+                    ]}
+                    onPress={completeToday}
+                  >
+                    <Text style={styles.startButtonText}>
+                      {completedDays.includes(currentDay) ? 'Completed ✓' : 'Mark Complete'}
+                    </Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              )}
+            </>
+          )}
         </View>
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>About</Text>
-          <TouchableOpacity onPress={() => openLink('https://samayhuf-star.github.io/45-days-abs-challenge/privacy/')}>
+          <TouchableOpacity onPress={() => openLink(PRIVACY_URL)}>
             <Text style={[styles.link, { color: accent }]}>Privacy Policy</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => openLink('https://samayhuf-star.github.io/45-days-abs-challenge/support/')}>
+          <TouchableOpacity onPress={() => openLink(TERMS_URL)}>
+            <Text style={[styles.link, { color: accent }]}>Terms of Use</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => openLink(SUPPORT_URL)}>
             <Text style={[styles.link, { color: accent }]}>Support</Text>
           </TouchableOpacity>
           <Text style={[styles.aboutNote, { color: colors.sub }]}>
-            Progressive 45-day core program. Focus on form, consistency, and gradual overload.
+            Progressive 45-day core program. Focus on form, consistency, and gradual overload. Consult a professional
+            if you are unsure whether this plan is right for you. Stop if you feel pain.
           </Text>
         </View>
 
@@ -475,6 +472,14 @@ export default function App() {
           <Text style={[styles.resetButtonText, { color: colors.sub }]}>Reset Progress</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Paywall
+        visible={paywallOpen}
+        onClose={() => setPaywallOpen(false)}
+        openLink={openLink}
+        accent={accent}
+        colors={colors}
+      />
 
       {activeVideo && (
         <View style={styles.videoModal}>
@@ -494,6 +499,14 @@ export default function App() {
   );
 }
 
+export default function App() {
+  return (
+    <IapProvider>
+      <AppInner />
+    </IapProvider>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loadingText: { textAlign: 'center', marginTop: 100, fontSize: 16 },
@@ -501,6 +514,8 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 26, fontWeight: '800' },
   headerSubtitle: { fontSize: 13, marginTop: 2 },
   themeToggle: { padding: 8 },
+  unlockBtn: { paddingHorizontal: 12, paddingVertical: 6, marginRight: 4 },
+  unlockBtnText: { fontSize: 16, fontWeight: '800' },
   accentRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 8 },
   accentDot: { width: 28, height: 28, borderRadius: 14 },
   accentDotActive: { borderWidth: 3, borderColor: '#fff' },
@@ -536,6 +551,7 @@ const styles = StyleSheet.create({
   workoutTitle: { fontSize: 20, fontWeight: '700', marginBottom: 4 },
   workoutMeta: { fontSize: 13, marginBottom: 8 },
   workoutNotes: { fontSize: 13, marginBottom: 10, fontStyle: 'italic' },
+  lockedCopy: { fontSize: 14, lineHeight: 20, marginBottom: 12 },
   exerciseCard: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 8, borderWidth: 1 },
   exerciseTitle: { fontSize: 15, fontWeight: '600' },
   exerciseSub: { fontSize: 12, marginTop: 2 },
