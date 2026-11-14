@@ -87,6 +87,12 @@ const EXERCISE_VIDEOS: Record<string, any> = {
   'Bicycle Crunch': require('./assets/videos/bicycle.mp4'),
   'Mountain Climber': require('./assets/videos/mountain.mp4'),
   'Side Plank': require('./assets/videos/sideplank.mp4'),
+  'Leg Raise': require('./assets/videos/legraise.mp4'),
+  'Bird Dog': require('./assets/videos/birddog.mp4'),
+  'Glute Bridge': require('./assets/videos/glutebridge.mp4'),
+  'Reverse Crunch': require('./assets/videos/reversecrunch.mp4'),
+  'Crunch': require('./assets/videos/crunch.mp4'),
+  'Heel Tap': require('./assets/videos/heeltap.mp4'),
 };
 
 function getVideoUrl(exercise: string): any | null {
