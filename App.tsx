@@ -18,7 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { IapProvider, useIapContext } from './src/IapProvider';
 import { Paywall } from './src/Paywall';
-import { PRIVACY_URL, SUPPORT_URL, TERMS_URL } from './src/products';
+import { MANAGE_SUBSCRIPTIONS_URL, PRIVACY_URL, SUPPORT_URL, TERMS_URL } from './src/products';
 import { CREDIT_LINE, mediaForExercise } from './src/exerciseMedia';
 import {
   PHASES,
@@ -27,6 +27,7 @@ import {
   estimateSets,
   getPhaseForDay,
   isDayUnlocked,
+  parseDurationMinutes,
   parseRestSeconds,
 } from './src/workouts';
 
@@ -126,17 +127,17 @@ function AppInner() {
     setRestSeconds(seconds);
     setRestActive(true);
     timerRef.current = setInterval(() => {
-      setRestSeconds((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          setRestActive(false);
-          Alert.alert('Rest over', 'Next set ready.');
-          return 0;
-        }
-        return prev - 1;
-      });
+      setRestSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
   };
+
+  useEffect(() => {
+    if (!restActive || restSeconds !== 0) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    setRestActive(false);
+    Alert.alert('Rest over', 'Next set ready.');
+  }, [restActive, restSeconds]);
 
   const stopRestTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -211,7 +212,9 @@ function AppInner() {
   const currentPhase = getPhaseForDay(selectedDay);
   const defaultRest = parseRestSeconds(todayWorkout.rest);
   const setsToday = estimateSets(todayWorkout.exercises);
-  const weekMinutes = Math.round(completedDays.filter((d) => d > currentDay - 7).length * 16);
+  const weekMinutes = completedDays
+    .filter((d) => d > currentDay - 7 && d <= currentDay)
+    .reduce((sum, d) => sum + parseDurationMinutes((WORKOUTS[d] || todayWorkout).duration), 0);
   const unlocked = isDayUnlocked(selectedDay, iap.isPro);
 
   const colors = {
@@ -359,7 +362,7 @@ function AppInner() {
                     locked && { opacity: 0.55 },
                   ]}
                 >
-                  <Text style={[styles.dayText, { color: isCompleted || isToday ? '#fff' : colors.sub }]}>
+                  <Text style={[styles.dayText, { color: isCompleted ? '#FFFFFF' : isToday ? accent : colors.sub }]}>
                     {isCompleted ? '✓' : locked ? '🔒' : day}
                   </Text>
                 </TouchableOpacity>
@@ -474,12 +477,12 @@ function AppInner() {
         <View testID="nutrition-section" style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Nutrition Tips</Text>
           <Text style={[styles.nutritionIntro, { color: colors.sub }]}>
-            Training and everyday eating habits work together. These are general suggestions, not a personal meal plan.
+            Training and everyday eating habits work together. These are general suggestions, not a personal meal plan or medical advice.
           </Text>
           <View testID="nutrition-card" style={[styles.nutritionCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• A modest calorie target that matches your energy needs, for example a little below maintenance if that is your goal (about 300 to 500 kcal)</Text>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Include protein in your meals. Many active adults aim for about 1.6 to 2.2 g per kg of body weight</Text>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Limit sugary drinks and liquid calories</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Choose a calorie target that matches your energy needs</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Include a protein source in your meals</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Limit sugary drinks</Text>
             <Text style={[styles.nutritionTip, { color: colors.text }]}>• Prioritize whole foods and vegetables</Text>
             <Text style={[styles.nutritionTip, { color: colors.text }]}>• Manage sodium and stay hydrated</Text>
             <Text style={[styles.nutritionTip, { color: colors.text }]}>• Consistent sleep supports recovery</Text>
@@ -499,6 +502,9 @@ function AppInner() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => openLink(SUPPORT_URL)}>
             <Text style={[styles.link, { color: accent }]}>Support</Text>
+          </TouchableOpacity>
+          <TouchableOpacity testID="manage-subscriptions" onPress={() => openLink(MANAGE_SUBSCRIPTIONS_URL)}>
+            <Text style={[styles.link, { color: accent }]}>Manage Subscriptions</Text>
           </TouchableOpacity>
           <Text style={[styles.aboutNote, { color: colors.sub }]}>
             Progressive 45-day core program. Focus on form, consistency, and gradual overload. Consult a professional

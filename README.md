@@ -25,7 +25,7 @@ Practical 45-day progressive abs and core challenge app built with Expo / React 
 Days 1 to 7 are free. Later days require Pro (monthly, yearly, or lifetime).
 
 ## Store
-See `store/listing.md` for copy and `store/assets-prompts.md` for icon/screenshot prompts.
+See `store/listing.md` for copy, `store/review-notes.md` for App Review notes, and `store/assets-prompts.md` for icon prompts. Listing screenshots are in `store/screenshots/`.
 
 ## Run
 ```bash

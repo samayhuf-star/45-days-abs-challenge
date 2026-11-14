@@ -23,3 +23,4 @@ export const PRIVACY_URL = 'https://samayhuf-star.github.io/45-days-abs-challeng
 export const TERMS_URL = 'https://samayhuf-star.github.io/45-days-abs-challenge/terms/';
 export const EULA_URL = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 export const SUPPORT_URL = 'https://samayhuf-star.github.io/45-days-abs-challenge/support/';
+export const MANAGE_SUBSCRIPTIONS_URL = 'https://apps.apple.com/account/subscriptions';
