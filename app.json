@@ -3,14 +3,14 @@
     "name": "45 Days Abs Challenge",
     "slug": "abs-challenge-45",
     "owner": "krosz",
-    "version": "1.0.0",
+    "version": "1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.momentum.abs45",
-      "buildNumber": "1",
+      "buildNumber": "3",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },

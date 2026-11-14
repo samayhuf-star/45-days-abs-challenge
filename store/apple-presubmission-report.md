@@ -1,36 +1,29 @@
 # Apple pre-submission report — 45 Days Abs Challenge
 
 - Date: 14 November 2026
-- Branch: `abs45/launch` (working branch `cursor/store-submission-qa-ee38`, based on `eacfd42`)
-- Version in `app.json`: 1.0.0, iOS build number 1, bundle `com.momentum.abs45`
-- `eas.json` production iOS `ascAppId`: 6834676005
-- No EAS build was run. App Store Connect was not opened. TestFlight 1.0.0 (2) was not installed.
+- Branch: `abs45/launch` (working branch `cursor/app-store-version-iap-02ce`)
+- Version in `app.json`: 1.0, iOS build number 3, bundle `com.momentum.abs45`
+- `eas.json`: `cli.appVersionSource` is `local` (not `remote`). Production `autoIncrement` is true. `submit.production.ios.ascAppId` is 6834676005.
+- No EAS build was run. App Store Connect was not opened. The TestFlight build already on the app (build 2) was not installed.
 - Web evidence: Expo web, Chrome, 430×932 CSS pixels. Earlier iOS sim: `qa/sim-shots/run-43584645762/summary.md` (maestro exit 0).
 
-**Summary line:** `PASS 44 · FAIL 7 · N/A 30 · NEEDS DEVICE 12 · NEEDS ASC 12 · Decision: DO NOT SUBMIT`
+**Summary line:** `PASS 51 · FAIL 0 · N/A 30 · NEEDS DEVICE 12 · NEEDS ASC 12 · Decision: DO NOT SUBMIT`
 
-FAIL blocks submission. The seven failures are the unpublished Privacy, Terms, and Support URLs (HTTP 404). Publishing GitHub Pages was not possible from this environment.
+The seven legal-URL failures from the previous pass now return HTTP 200. Nothing in this checklist is FAIL. Do not submit until the NEEDS DEVICE and NEEDS ASC rows are done on a phone and in App Store Connect.
 
-## FAIL
+## Legal URLs
 
-| ID | Why |
-| --- | --- |
-| B7 | Support, privacy, and terms URLs return 404. |
-| B8 | The live Support URL does not load, so the contact email on that page is not reachable. |
-| D7 | Paywall and About links open those same URLs, and the pages are not live. |
-| F1 | The privacy policy link does not open a live policy. |
-| H1 | Privacy URL HTTP 404. |
-| H2 | Support URL HTTP 404. |
-| H3 | Terms URL HTTP 404. Apple's standard EULA URL returns 200. |
+B7, B8, D7, F1, H1, H2, and H3 pass. `curl -sI -L` on 14 November 2026 (response `date: Sat, 14 Nov 2026 21:41:38 GMT`, `content-type: text/html`):
 
-`curl -sI -L` on 14 November 2026:
-
-- privacy `404 https://samayhuf-star.github.io/45-days-abs-challenge/privacy/`
-- terms `404 https://samayhuf-star.github.io/45-days-abs-challenge/terms/`
-- support `404 https://samayhuf-star.github.io/45-days-abs-challenge/support/`
+- privacy `200 https://samayhuf-star.github.io/45-days-abs-challenge/privacy/`
+- terms `200 https://samayhuf-star.github.io/45-days-abs-challenge/terms/`
+- support `200 https://samayhuf-star.github.io/45-days-abs-challenge/support/`
+- docs privacy `200 https://samayhuf-star.github.io/45-days-abs-challenge/docs/privacy/`
+- docs terms `200 https://samayhuf-star.github.io/45-days-abs-challenge/docs/terms/`
+- docs support `200 https://samayhuf-star.github.io/45-days-abs-challenge/docs/support/`
 - Apple EULA `200 https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`
 
-The HTML is in `docs/privacy/index.html`, `docs/terms/index.html`, and `docs/support/index.html`. GitHub Pages for this repository is not published.
+The root paths return 200, and the `/docs/` paths return 200 as well. The live pages are the Privacy Policy, Terms of Use, and Support HTML from this repo. Support and the policy both include `samayhuf@gmail.com`. GitHub Pages is serving the `gh-pages` branch.
 
 ## NEEDS DEVICE
 
@@ -50,6 +43,8 @@ The local StoreKit file and the paywall match the required prices. The live App 
 - Home screenshot caption no longer says "free" (`store/screenshots/01-home-plan.png`).
 - `ios.supportsTablet` is false, so a 13-inch screenshot set is not required for this phone layout.
 - The privacy manifest declares UserDefaults reason `CA92.1`, which covers on-device progress in AsyncStorage.
+- `expo.version` is `1.0` and `ios.buildNumber` is `3`.
+- IAP review screenshots, one per product, are in `store/iap-review/`. They are 1290×2796 captures of this paywall with that product selected.
 
 ## 4.3 note
 
@@ -63,7 +58,7 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 
 | ID | Area | Result | Evidence | Notes |
 | --- | --- | --- | --- | --- |
-| A1 | Binary matches listing | NEEDS ASC | `app.json` version 1.0.0, `ios.buildNumber` 1, bundle `com.momentum.abs45`. `eas.json` `ascAppId` 6834676005. | IPA not built here. TestFlight 1.0.0 (2) was not installed, so the uploaded build was not compared. |
+| A1 | Binary matches listing | NEEDS ASC | `app.json` version 1.0, `ios.buildNumber` 3, bundle `com.momentum.abs45`. `eas.json` `ascAppId` 6834676005. `cli.appVersionSource` is `local`. | IPA not built here. TestFlight build 2 was not installed, so the uploaded build was not compared. |
 | A2 | Clean install does not crash | NEEDS DEVICE | No physical iPhone. | Web cold load reached the home screen. |
 | A3 | Core journeys on device | NEEDS DEVICE | Web walk in `store/qa.md`. | Purchase and restore were not completed on a device. |
 | A4 | No placeholder UI | PASS | `rg` for coming soon, lorem, TBD, TO ADD in `*.tsx,ts,html,md,json` outside `node_modules` found no hits. Web walk opened home, workout, form, timer, paywall, and About. | |
@@ -81,8 +76,8 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 | B4 | Backends live | N/A | No API, auth, or CDN. Progress is AsyncStorage. | |
 | B5 | Review notes are a script | PASS | `store/review-notes.md` covers the plan, the paywall path, restore, legal links, StoreKit, and what was tested. | |
 | B6 | Every IAP works for review | NEEDS DEVICE | Product IDs in `src/products.ts` and `storekit/Abs45.storekit`. | No sandbox purchase. |
-| B7 | Metadata URLs work | FAIL | Privacy, terms, and support each returned HTTP 404. | See the curl block above. |
-| B8 | Support contact reachable | FAIL | `docs/support/index.html` lists samayhuf@gmail.com, but the Support URL returns 404. | ASC review-contact phone was not checked. |
+| B7 | Metadata URLs work | PASS | `curl -sI -L` on 14 November 2026: privacy, terms, and support each returned HTTP 200. `/docs/privacy/`, `/docs/terms/`, and `/docs/support/` also returned HTTP 200. | See the curl block above. |
+| B8 | Support contact reachable | PASS | Support URL HTTP 200. The live page lists samayhuf@gmail.com. | ASC review-contact phone was not checked (I3). |
 | B9 | External services named | PASS | Notes name StoreKit as the only external service. | |
 | B10 | Devices and OS in notes | NEEDS DEVICE | Notes record web and the earlier simulator run only. | No physical device pass to list. |
 | C1 | Metadata matches the binary | PASS | `store/listing.md` matches the web walk: 45-day plan, days 1–7 free, timer, stills, three prices. | |
@@ -91,7 +86,7 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 | C4 | iPhone screenshot size | PASS | All five PNGs are 1290×2796, color type 2, no alpha. Apple lists 1290×2796 for Dynamic Island large display and scales that set into the required medium slot. | [Screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/) |
 | C5 | iPad 13-inch screenshots | N/A | `app.json` `ios.supportsTablet` is false. | |
 | C6 | More than half show the app in use | PASS | 5 of 5: plan, workout list, timer running, form still open, calendar after a completion. The bar for 5 images is 3. | 16 October 2026 screenshot guidance. |
-| C7 | Screenshots match TestFlight | NEEDS DEVICE | Shots are from this branch's web UI. | Not compared with build 1.0.0 (2). |
+| C7 | Screenshots match TestFlight | NEEDS DEVICE | Shots are from this branch's web UI. | Not compared with TestFlight build 2. |
 | C8 | No other-platform imagery | PASS | Screenshots show this UI only. `android` appears in `app.json`, `eas.json`, and the npm script, not in the UI or shots. | |
 | C9 | No prices in name, subtitle, keywords, or shots | PASS | Name, subtitle, and keywords have no price. The home caption was changed from "Days 1 to 7 are free" to "Four phases, one day at a time." | Prices stay in the description and on the paywall. |
 | C10 | Name length and keywords | PASS | Name is 21 characters. Keywords are 85 characters and do not name the sibling apps. | |
@@ -107,7 +102,7 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 | D4 | One subscription group | NEEDS ASC | `storekit/Abs45.storekit` has one group, "Pro", with monthly and yearly. Lifetime is outside the group. | ASC group and upgrade path were not opened. |
 | D5 | Schedule 2 disclosures before purchase | PASS | `src/Paywall.tsx` shows title, length (1 month, 1 year, or does not renew), the full price, what Pro unlocks, and the renewal paragraph above Continue. | |
 | D6 | Trial length and post-trial price | PASS | Plan rows say "7-day free trial, then $2.99 billed every month" and the yearly equivalent. Lifetime says no trial. | |
-| D7 | Live Privacy and Terms from the paywall | FAIL | Links are above Continue and again in About. | Both custom URLs return 404, so the live-page half fails. |
+| D7 | Live Privacy and Terms from the paywall | PASS | Links are above Continue and again in About. Privacy and Terms both return HTTP 200. | |
 | D8 | Metadata points at Privacy and Terms | NEEDS ASC | Description in `store/listing.md` includes Privacy, Terms, and the standard EULA URL. | The ASC license field was not opened. |
 | D9 | Prices match ASC and the listing | NEEDS ASC | Paywall fallbacks, `FALLBACK_PRICES`, and the StoreKit numbers are $2.99, $19.99, and $39.99. | ASC prices were not opened. |
 | D10 | No unfinished paywall benefits | PASS | The benefit is days 8–45, which `src/workouts.ts` defines. `assert-workouts` passed. | |
@@ -125,7 +120,7 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 | E6 | No impersonation | PASS | Descriptive name. Icon is this repo's `assets/icon.png`. | No trademark search in ASC. |
 | E7 | No forced ratings | PASS | No rating or cross-download gate in `App.tsx`. | |
 | E8 | Works without another app | PASS | First screen is the plan. | |
-| F1 | Live privacy policy is complete | FAIL | URL returns 404. | In-repo policy covers on-device data, no account, Apple payments, no ads, Reset Progress, and samayhuf@gmail.com. |
+| F1 | Live privacy policy is complete | PASS | Privacy URL HTTP 200. The live page covers on-device progress, no account, Apple payments, no ads, Reset Progress, and samayhuf@gmail.com. | |
 | F2 | Nutrition labels | NEEDS ASC | `package.json` has no analytics or ads SDK. | ASC App Privacy was not walked. |
 | F3 | Privacy manifest reasons | NEEDS DEVICE | `app.json` now declares `NSPrivacyAccessedAPICategoryUserDefaults` / `CA92.1`. | The IPA was not unzipped, so the packaged `PrivacyInfo.xcprivacy` was not confirmed. |
 | F4 | Listed third-party SDK manifests | N/A | Dependencies are Expo, expo-iap, AsyncStorage, and React Native. None are on Apple's commonly required binary-SDK list. | |
@@ -146,10 +141,10 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 | G3 | Consult a professional | PASS | About, nutrition note, and `docs/terms/index.html` say to consult a professional and to stop if you feel pain. | |
 | G4 | Age-rating answers | NEEDS ASC | Suggested 4+. The questionnaire was not re-answered. | |
 | G5 | Notes do not over-claim | PASS | Notes call it a training plan and say it is not medical advice. | |
-| H1 | Privacy URL 200 | FAIL | HTTP 404, as above. | |
-| H2 | Support URL 200 | FAIL | HTTP 404. The in-repo page has an email. | |
-| H3 | Terms URL 200 | FAIL | Custom terms URL HTTP 404. Apple EULA URL HTTP 200. | |
-| H4 | Legal links before purchase | PASS | Terms, Apple EULA, and Privacy are on the paywall above Continue, and again in About. | The custom pages 404; that is H1 and H3. |
+| H1 | Privacy URL 200 | PASS | HTTP 200 `https://samayhuf-star.github.io/45-days-abs-challenge/privacy/`. `/docs/privacy/` also HTTP 200. | |
+| H2 | Support URL 200 | PASS | HTTP 200 `https://samayhuf-star.github.io/45-days-abs-challenge/support/`. The live page has samayhuf@gmail.com. `/docs/support/` also HTTP 200. | |
+| H3 | Terms URL 200 | PASS | Custom terms URL HTTP 200. `/docs/terms/` also HTTP 200. Apple EULA URL HTTP 200. | |
+| H4 | Legal links before purchase | PASS | Terms, Apple EULA, and Privacy are on the paywall above Continue, and again in About. | The custom pages return HTTP 200 (H1 and H3). |
 | H5 | No placeholder URLs | PASS | Listing and notes have no lorem, TO ADD, or example.com. | |
 | I1 | Extra demo materials | N/A | No OTP, QR, or sample file. | |
 | I2 | Hardware video | N/A | No accessory. | |
@@ -169,4 +164,4 @@ Five iPhone screenshots, all showing the app in use: the plan, today's workout, 
 | L4 | Third-party trademarks | N/A | No celebrity or sports marks. CC BY-SA credit for plank and side plank is the About `CREDIT_LINE`. | |
 | L5 | No real personal data in shots | PASS | Same as C16. | |
 
-Decision: **DO NOT SUBMIT** until B7, B8, D7, F1, H1, H2, and H3 are fixed by publishing the three legal URLs, and until the NEEDS DEVICE and NEEDS ASC rows have been done on a phone and in App Store Connect.
+Decision: **DO NOT SUBMIT** until the NEEDS DEVICE and NEEDS ASC rows have been done on a phone and in App Store Connect. B7, B8, D7, F1, H1, H2, and H3 now pass: the privacy, terms, and support URLs return HTTP 200.
