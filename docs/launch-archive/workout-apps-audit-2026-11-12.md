@@ -103,7 +103,7 @@ Optional before a useful QA pass, but not required just to land a binary: finish
 ### Backup
 Private Google Drive folder named exactly **Momentum for Women** (owner only, Samay's account; not shared):
 
-https://drive.google.com/drive/folders/1Tjtkm3QYrsv_KgxJmsgmqs0N8LX4act_
+[private recording link redacted]
 
 Contents: `momentum-for-women-source-cc36db3-2026-11-12.zip` (git-tracked source only; no `node_modules`, `.git`, or `.env`).
 
@@ -182,7 +182,7 @@ Strongly recommended before a useful TestFlight pass, though not strictly requir
 ### Backup
 Private Google Drive folder named exactly **CoreForge** (owner only, Samay's account; not shared):
 
-https://drive.google.com/drive/folders/1JrJrKaBR4pmQYLzQZM7WcsXYi89asGDS
+[private recording link redacted]
 
 Contents: `coreforge-source-ba99ffd-2026-11-12.zip` (git-tracked source only; no `node_modules`, `.git`, or `.env`).
 
@@ -284,6 +284,6 @@ Do both. A lockfile alone would still be installed under Node 18 if the image is
 ### Backup
 Private Google Drive folder named exactly **45 Days Abs Challenge** (owner only, Samay's account; not shared):
 
-https://drive.google.com/drive/folders/1OOW36_OIRsX_ZLVR96eGDrBl8tNNxA7U
+[private recording link redacted]
 
 Contents: `45-days-abs-challenge-source-71a3b3b-2026-11-12.zip` (git-tracked source only; no `node_modules`, `.git`, or `.env`). A local `package-lock.json` was generated on the box for the install and typecheck only and was not uploaded or committed.
