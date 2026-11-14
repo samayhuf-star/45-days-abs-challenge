@@ -458,6 +458,25 @@ export default function App() {
           </Animated.View>
         </View>
 
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Nutrition for Core Definition</Text>
+          <Text style={[styles.nutritionIntro, { color: colors.sub }]}>
+            Training builds the muscle. Nutrition determines if it shows.
+          </Text>
+          <View style={[styles.nutritionCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Mild calorie deficit (300–500 kcal below maintenance)</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Protein: 1.6–2.2g per kg body weight</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Cut sugary drinks and liquid calories</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Prioritize whole foods and vegetables</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Manage sodium and stay hydrated</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Consistent sleep supports fat loss</Text>
+          </View>
+          <Text style={[styles.nutritionNote, { color: colors.sub }]}>
+            Abs become more visible at lower body fat. Spot reduction does not work.
+          </Text>
+        </View>
+
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>About</Text>
           <TouchableOpacity onPress={() => openLink('https://samayhuf-star.github.io/45-days-abs-challenge/privacy/')}>
@@ -519,6 +538,10 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 11, marginTop: 2 },
   section: { marginHorizontal: 16, marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
+  nutritionIntro: { fontSize: 13, marginBottom: 12, lineHeight: 18 },
+  nutritionCard: { borderRadius: 12, padding: 14, marginBottom: 10 },
+  nutritionTip: { fontSize: 14, marginBottom: 6, lineHeight: 20 },
+  nutritionNote: { fontSize: 12, fontStyle: 'italic', lineHeight: 17 },
   phaseIntro: { fontSize: 13, marginBottom: 10, lineHeight: 18 },
   phaseRow: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 6, borderWidth: 1 },
   phaseDot: { width: 12, height: 12, borderRadius: 6, marginRight: 10 },
