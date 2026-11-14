@@ -9,7 +9,7 @@ import {
   SafeAreaView,
   Dimensions,
   Alert,
-  Platform,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -18,10 +18,10 @@ const TOTAL_DAYS = 45;
 const STORAGE_KEY = '@abs_challenge_progress_v2';
 
 const PHASES = [
-  { name: 'Foundation', days: '1–10', focus: 'Form & Activation', color: '#3B82F6' },
-  { name: 'Build', days: '11–25', focus: 'Strength & Volume', color: '#8B5CF6' },
-  { name: 'Intensify', days: '26–40', focus: 'Density & Control', color: '#F59E0B' },
-  { name: 'Peak', days: '41–45', focus: 'Finish Strong', color: '#EF4444' },
+  { name: 'Foundation', days: '1–10', focus: 'Form & Activation', color: '#3B82F6', start: 1, end: 10 },
+  { name: 'Build', days: '11–25', focus: 'Strength & Volume', color: '#8B5CF6', start: 11, end: 25 },
+  { name: 'Intensify', days: '26–40', focus: 'Density & Control', color: '#F59E0B', start: 26, end: 40 },
+  { name: 'Peak', days: '41–45', focus: 'Finish Strong', color: '#EF4444', start: 41, end: 45 },
 ];
 
 type Workout = {
@@ -33,7 +33,6 @@ type Workout = {
 };
 
 const WORKOUTS: Record<number, Workout> = {
-  // Foundation (1-10)
   1: { title: 'Core Activation', exercises: ['Dead Bug 3×10', 'Glute Bridge 3×12', 'Bird Dog 3×8/side', 'Plank 3×20s'], duration: '12 min', rest: '45s' },
   2: { title: 'Crunch Foundations', exercises: ['Crunch 3×12', 'Reverse Crunch 3×10', 'Heel Tap 3×12/side', 'Plank 3×25s'], duration: '14 min', rest: '45s' },
   3: { title: 'Stability Basics', exercises: ['Dead Bug 3×12', 'Side Plank 3×15s/side', 'Bird Dog 3×10/side', 'Glute Bridge 3×15'], duration: '13 min', rest: '45s' },
@@ -44,8 +43,6 @@ const WORKOUTS: Record<number, Workout> = {
   8: { title: 'Foundation Mix', exercises: ['Dead Bug 3×15', 'Leg Raise 3×10', 'Plank 3×35s', 'Bird Dog 3×10/side'], duration: '16 min', rest: '40s' },
   9: { title: 'Endurance Base', exercises: ['Plank 3×40s', 'Crunch 3×15', 'Reverse Crunch 3×12', 'Side Plank 3×25s/side'], duration: '16 min', rest: '40s' },
   10: { title: 'Foundation Test', exercises: ['Dead Bug 4×12', 'Plank 4×30s', 'Bird Dog 3×12/side', 'Glute Bridge 3×15'], duration: '18 min', rest: '45s' },
-
-  // Build (11-25)
   11: { title: 'Volume Increase', exercises: ['Bicycle Crunch 3×12/side', 'Mountain Climber 3×20', 'Leg Raise 3×10', 'Plank 3×40s'], duration: '16 min', rest: '35s' },
   12: { title: 'Core Builder', exercises: ['Bicycle Crunch 3×15/side', 'Mountain Climber 3×25', 'Leg Raise 3×12', 'Side Plank 3×25s/side'], duration: '17 min', rest: '35s' },
   13: { title: 'Strength Focus', exercises: ['Leg Raise 4×10', 'Crunch 3×15', 'Plank 3×45s', 'Bird Dog 3×12/side'], duration: '17 min', rest: '35s' },
@@ -61,8 +58,6 @@ const WORKOUTS: Record<number, Workout> = {
   23: { title: 'Build Mix', exercises: ['Dead Bug 4×12', 'Leg Raise 3×12', 'Side Plank 4×25s/side', 'Mountain Climber 3×25'], duration: '19 min', rest: '30s' },
   24: { title: 'Volume Peak', exercises: ['Bicycle Crunch 4×15/side', 'Crunch 4×15', 'Plank 4×40s', 'Bird Dog 3×12/side'], duration: '20 min', rest: '30s' },
   25: { title: 'Build Finale', exercises: ['Leg Raise 4×12', 'Mountain Climber 4×25', 'Side Plank 3×40s/side', 'Dead Bug 4×12'], duration: '21 min', rest: '30s' },
-
-  // Intensify (26-40)
   26: { title: 'Density Start', exercises: ['Mountain Climber 5×20', 'Bicycle Crunch 4×12/side', 'Leg Raise 4×10', 'Plank 4×40s'], duration: '20 min', rest: '25s' },
   27: { title: 'Control Focus', exercises: ['Dead Bug 4×15', 'Side Plank 4×30s/side', 'Reverse Crunch 4×12', 'Bird Dog 4×10/side'], duration: '20 min', rest: '25s' },
   28: { title: 'Intensify Mix', exercises: ['Leg Raise 5×10', 'Mountain Climber 4×25', 'Crunch 4×15', 'Plank 4×45s'], duration: '21 min', rest: '20s' },
@@ -78,14 +73,16 @@ const WORKOUTS: Record<number, Workout> = {
   38: { title: 'High Intensity', exercises: ['Mountain Climber 6×20', 'Side Plank 4×40s/side', 'Reverse Crunch 4×15', 'Dead Bug 5×12'], duration: '23 min', rest: '15s' },
   39: { title: 'Intensify Finale', exercises: ['Leg Raise 5×12', 'Bicycle Crunch 5×12/side', 'Plank 5×45s', 'Bird Dog 4×12/side'], duration: '24 min', rest: '20s' },
   40: { title: 'Pre-Peak Test', exercises: ['Mountain Climber 5×25', 'Leg Raise 5×12', 'Side Plank 5×30s/side', 'Dead Bug 5×12'], duration: '24 min', rest: '20s' },
-
-  // Peak (41-45)
   41: { title: 'Peak Start', exercises: ['Bicycle Crunch 5×15/side', 'Mountain Climber 5×25', 'Leg Raise 5×12', 'Plank 5×45s'], duration: '22 min', rest: '20s' },
   42: { title: 'Peak Density', exercises: ['Side Plank 5×35s/side', 'Dead Bug 5×15', 'Reverse Crunch 5×12', 'Mountain Climber 5×25'], duration: '23 min', rest: '15s' },
   43: { title: 'Peak Control', exercises: ['Leg Raise 5×15', 'Bicycle Crunch 5×15/side', 'Plank 5×50s', 'Bird Dog 5×10/side'], duration: '23 min', rest: '15s' },
-  44: { title: 'Peak Push', exercises: ['Mountain Climber 6×20', 'Crunch 5×15', 'Side Plank 5×30s/side', 'Dead Dog 5×12'], duration: '22 min', rest: '15s' },
+  44: { title: 'Peak Push', exercises: ['Mountain Climber 6×20', 'Crunch 5×15', 'Side Plank 5×30s/side', 'Dead Bug 5×12'], duration: '22 min', rest: '15s' },
   45: { title: 'Final Peak', exercises: ['Bicycle Crunch 5×15/side', 'Leg Raise 5×12', 'Plank 5×45s', 'Mountain Climber 5×25', 'Dead Bug 4×12'], duration: '25 min', rest: '20s', notes: 'You did it. Strong finish.' },
 };
+
+function getPhaseForDay(day: number) {
+  return PHASES.find(p => day >= p.start && day <= p.end) || PHASES[0];
+}
 
 export default function App() {
   const [currentDay, setCurrentDay] = useState(1);
@@ -136,7 +133,10 @@ export default function App() {
     setCurrentDay(nextDay);
     setStreak(newStreak);
     saveProgress(newCompleted, nextDay, newStreak);
-    Alert.alert('Great job!', `Day ${currentDay} complete. Keep the streak going!`);
+    const msg = currentDay === TOTAL_DAYS
+      ? 'Challenge complete! You finished all 45 days.'
+      : `Day ${currentDay} complete. Keep the streak going!`;
+    Alert.alert('Great job!', msg);
   };
 
   const resetProgress = () => {
@@ -159,8 +159,11 @@ export default function App() {
     );
   };
 
+  const openLink = (url: string) => Linking.openURL(url).catch(() => {});
+
   const progressPercent = Math.round((completedDays.length / TOTAL_DAYS) * 100);
   const todayWorkout = WORKOUTS[currentDay] || WORKOUTS[1];
+  const currentPhase = getPhaseForDay(currentDay);
 
   if (loading) {
     return (
@@ -200,16 +203,19 @@ export default function App() {
           <Text style={styles.phaseIntro}>
             Progressive overload across 4 phases. Form first, then volume, then density.
           </Text>
-          {PHASES.map((phase, index) => (
-            <View key={index} style={styles.phaseRow}>
-              <View style={[styles.phaseDot, { backgroundColor: phase.color }]} />
-              <View style={styles.phaseInfo}>
-                <Text style={styles.phaseName}>{phase.name}</Text>
-                <Text style={styles.phaseDays}>Days {phase.days}</Text>
+          {PHASES.map((phase, index) => {
+            const active = phase.name === currentPhase.name;
+            return (
+              <View key={index} style={[styles.phaseRow, active && styles.phaseRowActive]}>
+                <View style={[styles.phaseDot, { backgroundColor: phase.color }]} />
+                <View style={styles.phaseInfo}>
+                  <Text style={styles.phaseName}>{phase.name}{active ? '  •  Current' : ''}</Text>
+                  <Text style={styles.phaseDays}>Days {phase.days}</Text>
+                </View>
+                <Text style={styles.phaseFocus}>{phase.focus}</Text>
               </View>
-              <Text style={styles.phaseFocus}>{phase.focus}</Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         <View style={styles.section}>
@@ -222,12 +228,13 @@ export default function App() {
               const day = i + 1;
               const isCompleted = completedDays.includes(day);
               const isToday = day === currentDay && !isCompleted;
+              const phase = getPhaseForDay(day);
               return (
                 <View
                   key={day}
                   style={[
                     styles.dayBox,
-                    isCompleted && styles.dayCompleted,
+                    isCompleted && { backgroundColor: phase.color },
                     isToday && styles.dayToday,
                   ]}
                 >
@@ -248,11 +255,26 @@ export default function App() {
           {todayWorkout.exercises.map((ex, i) => (
             <Text key={i} style={styles.exerciseItem}>• {ex}</Text>
           ))}
-          <TouchableOpacity style={styles.startButton} onPress={completeToday}>
+          <TouchableOpacity
+            style={[styles.startButton, completedDays.includes(currentDay) && styles.startButtonDone]}
+            onPress={completeToday}
+            disabled={completedDays.includes(currentDay)}
+          >
             <Text style={styles.startButtonText}>
               {completedDays.includes(currentDay) ? 'Completed' : 'Mark Complete'}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>About</Text>
+          <TouchableOpacity onPress={() => openLink('https://samayhuf-star.github.io/45-days-abs-challenge/privacy/')}>
+            <Text style={styles.link}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => openLink('https://samayhuf-star.github.io/45-days-abs-challenge/support/')}>
+            <Text style={styles.link}>Support</Text>
+          </TouchableOpacity>
+          <Text style={styles.aboutNote}>All progress is stored only on this device. No accounts. No ads.</Text>
         </View>
 
         <TouchableOpacity style={styles.resetButton} onPress={resetProgress}>
@@ -303,6 +325,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#141A26',
     borderRadius: 12, padding: 12, marginBottom: 8,
   },
+  phaseRowActive: { borderWidth: 1, borderColor: '#3B82F6' },
   phaseDot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
   phaseInfo: { flex: 1 },
   phaseName: { fontSize: 14, fontWeight: '600', color: '#FFFFFF' },
@@ -314,7 +337,6 @@ const styles = StyleSheet.create({
     width: (width - 32 - 30) / 7, aspectRatio: 1, borderRadius: 7,
     backgroundColor: '#1E293B', justifyContent: 'center', alignItems: 'center',
   },
-  dayCompleted: { backgroundColor: '#3B82F6' },
   dayToday: { backgroundColor: '#2563EB', borderWidth: 2, borderColor: '#60A5FA' },
   dayText: { color: '#8B95A7', fontSize: 11, fontWeight: '600' },
   dayTextActive: { color: '#FFFFFF' },
@@ -329,7 +351,10 @@ const styles = StyleSheet.create({
   startButton: {
     backgroundColor: '#3B82F6', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 12,
   },
+  startButtonDone: { backgroundColor: '#334155' },
   startButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  link: { color: '#3B82F6', fontSize: 15, marginBottom: 8, fontWeight: '500' },
+  aboutNote: { fontSize: 13, color: '#8B95A7', marginTop: 8, lineHeight: 18 },
   resetButton: {
     marginHorizontal: 16, marginBottom: 20, paddingVertical: 12, alignItems: 'center',
   },
