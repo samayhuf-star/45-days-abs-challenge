@@ -27,7 +27,7 @@ FEATURES
 - Full 45-day progressive workout plan, including planned recovery days
 - Daily streak counter
 - Visual progress calendar
-- Form videos for each exercise
+- Form photos for each exercise
 - All workout data stays on your device
 - No accounts and no ads
 

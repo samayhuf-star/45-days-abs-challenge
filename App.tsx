@@ -12,14 +12,14 @@ import {
   Linking,
   Animated,
   Easing,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Video, ResizeMode } from 'expo-av';
 
 import { IapProvider, useIapContext } from './src/IapProvider';
 import { Paywall } from './src/Paywall';
 import { PRIVACY_URL, SUPPORT_URL, TERMS_URL } from './src/products';
-import { getVideoSource } from './src/videos';
+import { CREDIT_LINE, mediaForExercise } from './src/exerciseMedia';
 import {
   PHASES,
   TOTAL_DAYS,
@@ -44,7 +44,8 @@ function AppInner() {
   const [loading, setLoading] = useState(true);
   const [restSeconds, setRestSeconds] = useState(0);
   const [restActive, setRestActive] = useState(false);
-  const [activeVideo, setActiveVideo] = useState<any>(null);
+  const [activeForm, setActiveForm] = useState<any[] | null>(null);
+  const formFade = useRef(new Animated.Value(0)).current;
   const [isDark, setIsDark] = useState(true);
   const [accent, setAccent] = useState('#3B82F6');
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -58,6 +59,23 @@ function AppInner() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!activeForm || activeForm.length < 2) {
+      formFade.setValue(0);
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(formFade, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.delay(700),
+        Animated.timing(formFade, { toValue: 0, duration: 900, useNativeDriver: true }),
+        Animated.delay(700),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [activeForm, formFade]);
 
   const loadTheme = async () => {
     try {
@@ -378,7 +396,7 @@ function AppInner() {
           ) : (
             <>
               {todayWorkout.exercises.map((ex, i) => {
-                const videoSource = getVideoSource(ex);
+                const frames = mediaForExercise(ex);
                 return (
                   <View
                     key={i}
@@ -389,14 +407,15 @@ function AppInner() {
                   >
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.exerciseTitle, { color: colors.text }]}>{ex}</Text>
-                      <Text style={[styles.exerciseSub, { color: colors.sub }]}>Tap to watch form</Text>
+                      <Text style={[styles.exerciseSub, { color: colors.sub }]}>Tap to see form</Text>
                     </View>
-                    {videoSource && (
+                    {frames.length > 0 && (
                       <TouchableOpacity
+                        testID={`form-button-${i}`}
                         style={[styles.watchBtn, { backgroundColor: accent }]}
-                        onPress={() => setActiveVideo(videoSource)}
+                        onPress={() => setActiveForm(frames)}
                       >
-                        <Text style={styles.watchBtnText}>▶ Form</Text>
+                        <Text style={styles.watchBtnText}>Form</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -485,6 +504,11 @@ function AppInner() {
             Progressive 45-day core program. Focus on form, consistency, and gradual overload. Consult a professional
             if you are unsure whether this plan is right for you. Stop if you feel pain.
           </Text>
+          {CREDIT_LINE ? (
+            <Text testID="media-credits" style={[styles.aboutNote, { color: colors.sub }]}>
+              {CREDIT_LINE}
+            </Text>
+          ) : null}
         </View>
 
         <TouchableOpacity style={styles.resetButton} onPress={resetProgress}>
@@ -500,16 +524,19 @@ function AppInner() {
         colors={colors}
       />
 
-      {activeVideo && (
-        <View style={styles.videoModal}>
-          <Video
-            source={activeVideo}
-            style={styles.video}
-            useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
-            shouldPlay
-          />
-          <TouchableOpacity style={[styles.closeVideo, { backgroundColor: accent }]} onPress={() => setActiveVideo(null)}>
+      {activeForm && (
+        <View testID="form-media" style={styles.videoModal}>
+          <View style={styles.formImageWrap}>
+            <Image source={activeForm[0]} style={styles.formImage} resizeMode="contain" />
+            {activeForm.length > 1 ? (
+              <Animated.Image
+                source={activeForm[1]}
+                style={[styles.formImage, styles.formImageOverlay, { opacity: formFade }]}
+                resizeMode="contain"
+              />
+            ) : null}
+          </View>
+          <TouchableOpacity testID="form-media-close" style={[styles.closeVideo, { backgroundColor: accent }]} onPress={() => setActiveForm(null)}>
             <Text style={styles.closeVideoText}>Close</Text>
           </TouchableOpacity>
         </View>
@@ -598,7 +625,9 @@ const styles = StyleSheet.create({
   resetButton: { marginHorizontal: 16, marginBottom: 30, paddingVertical: 12, alignItems: 'center' },
   resetButtonText: { fontSize: 14 },
   videoModal: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center', zIndex: 10 },
-  video: { width: width * 0.92, height: width * 0.65, backgroundColor: '#000', borderRadius: 12 },
+  formImageWrap: { width: width * 0.92, height: width * 0.65, backgroundColor: '#000', borderRadius: 12, overflow: 'hidden' },
+  formImage: { width: '100%', height: '100%' },
+  formImageOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   closeVideo: { marginTop: 20, paddingHorizontal: 28, paddingVertical: 12, borderRadius: 10 },
   closeVideoText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });

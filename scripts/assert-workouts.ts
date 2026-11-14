@@ -2,9 +2,9 @@ import {
   FREE_DAYS,
   RECOVERY_DAYS,
   TOTAL_DAYS,
-  VIDEO_KEYS,
+  EXERCISE_KEYS,
   WORKOUTS,
-  videoKeyFor,
+  exerciseKeyFor,
 } from '../src/workouts.ts';
 
 const BANNED = [
@@ -55,14 +55,14 @@ for (const day of days) {
   }
 
   for (const ex of w.exercises) {
-    const key = videoKeyFor(ex);
-    if (!key) fail(`Day ${day} exercise has no video mapping: ${ex}`);
+    const key = exerciseKeyFor(ex);
+    if (!key) fail(`Day ${day} exercise has no exercise-media mapping: ${ex}`);
     else usedKeys.add(key);
   }
 }
 
-for (const key of VIDEO_KEYS) {
-  if (!usedKeys.has(key)) fail(`Video key never used: ${key}`);
+for (const key of EXERCISE_KEYS) {
+  if (!usedKeys.has(key)) fail(`Exercise key never used: ${key}`);
 }
 
 if (FREE_DAYS !== 7) fail(`Expected 7 free days, got ${FREE_DAYS}`);
@@ -73,4 +73,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`assert-workouts OK: ${TOTAL_DAYS} unique days, recovery on ${RECOVERY_DAYS.join(', ')}, ${usedKeys.size} video keys used, days 1-${FREE_DAYS} free`);
+console.log(`assert-workouts OK: ${TOTAL_DAYS} unique days, recovery on ${RECOVERY_DAYS.join(', ')}, ${usedKeys.size} exercise keys used, days 1-${FREE_DAYS} free`);

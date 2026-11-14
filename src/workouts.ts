@@ -18,7 +18,7 @@ export type Workout = {
   recovery?: boolean;
 };
 
-export const VIDEO_KEYS = [
+export const EXERCISE_KEYS = [
   'Bicycle Crunch',
   'Reverse Crunch',
   'Mountain Climber Alt',
@@ -36,11 +36,11 @@ export const VIDEO_KEYS = [
   'Plank',
 ] as const;
 
-const VIDEO_KEYS_BY_LENGTH = [...VIDEO_KEYS].sort((a, b) => b.length - a.length);
+const EXERCISE_KEYS_BY_LENGTH = [...EXERCISE_KEYS].sort((a, b) => b.length - a.length);
 
-export function videoKeyFor(exercise: string): string | null {
+export function exerciseKeyFor(exercise: string): string | null {
   const lower = exercise.toLowerCase();
-  for (const key of VIDEO_KEYS_BY_LENGTH) {
+  for (const key of EXERCISE_KEYS_BY_LENGTH) {
     if (lower.includes(key.toLowerCase())) {
       return key;
     }
