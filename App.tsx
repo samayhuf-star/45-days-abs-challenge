@@ -93,6 +93,7 @@ const EXERCISE_VIDEOS: Record<string, any> = {
   'Reverse Crunch': require('./assets/videos/reversecrunch.mp4'),
   'Crunch': require('./assets/videos/crunch.mp4'),
   'Heel Tap': require('./assets/videos/heeltap.mp4'),
+  'Cat-Cow': require('./assets/videos/catcow.mp4'),
 };
 
 function getVideoUrl(exercise: string): any | null {
