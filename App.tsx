@@ -12,6 +12,7 @@ import {
   Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Video, ResizeMode } from 'expo-av';
 
 const { width } = Dimensions.get('window');
 const TOTAL_DAYS = 45;
@@ -80,22 +81,15 @@ const WORKOUTS: Record<number, Workout> = {
   45: { title: 'Final Peak', exercises: ['Bicycle Crunch 5×15/side', 'Leg Raise 5×12', 'Plank 5×45s', 'Mountain Climber 5×25', 'Dead Bug 4×12'], duration: '25 min', rest: '20s', notes: 'You did it. Strong finish.' },
 };
 
-const EXERCISE_VIDEOS: Record<string, string> = {
-  'Dead Bug': 'https://www.youtube.com/results?search_query=dead+bug+exercise+form',
-  'Glute Bridge': 'https://www.youtube.com/results?search_query=glute+bridge+exercise+form',
-  'Bird Dog': 'https://www.youtube.com/results?search_query=bird+dog+exercise+form',
-  'Plank': 'https://www.youtube.com/results?search_query=plank+exercise+proper+form',
-  'Crunch': 'https://www.youtube.com/results?search_query=crunch+exercise+form',
-  'Reverse Crunch': 'https://www.youtube.com/results?search_query=reverse+crunch+exercise+form',
-  'Heel Tap': 'https://www.youtube.com/results?search_query=heel+tap+ab+exercise+form',
-  'Side Plank': 'https://www.youtube.com/results?search_query=side+plank+exercise+form',
-  'Leg Raise': 'https://www.youtube.com/results?search_query=leg+raise+exercise+form',
-  'Bicycle Crunch': 'https://www.youtube.com/results?search_query=bicycle+crunch+exercise+form',
-  'Mountain Climber': 'https://www.youtube.com/results?search_query=mountain+climber+exercise+form',
-  'Cat-Cow': 'https://www.youtube.com/results?search_query=cat+cow+stretch+form',
+const EXERCISE_VIDEOS: Record<string, any> = {
+  'Dead Bug': require('./assets/videos/deadbug.mp4'),
+  'Plank': require('./assets/videos/plank.mp4'),
+  'Bicycle Crunch': require('./assets/videos/bicycle.mp4'),
+  'Mountain Climber': require('./assets/videos/mountain.mp4'),
+  'Side Plank': require('./assets/videos/sideplank.mp4'),
 };
 
-function getVideoUrl(exercise: string): string | null {
+function getVideoUrl(exercise: string): any | null {
   for (const key of Object.keys(EXERCISE_VIDEOS)) {
     if (exercise.toLowerCase().includes(key.toLowerCase())) {
       return EXERCISE_VIDEOS[key];
@@ -120,6 +114,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [restSeconds, setRestSeconds] = useState(0);
   const [restActive, setRestActive] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<any>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -313,12 +308,12 @@ export default function App() {
           {todayWorkout.notes ? <Text style={styles.workoutNotes}>{todayWorkout.notes}</Text> : null}
 
           {todayWorkout.exercises.map((ex, i) => {
-            const videoUrl = getVideoUrl(ex);
+            const videoSource = getVideoUrl(ex);
             return (
               <View key={i} style={styles.exerciseRow}>
                 <Text style={styles.exerciseItem}>• {ex}</Text>
-                {videoUrl && (
-                  <TouchableOpacity onPress={() => openLink(videoUrl)}>
+                {videoSource && (
+                  <TouchableOpacity onPress={() => setActiveVideo(videoSource)}>
                     <Text style={styles.videoLink}>Watch form</Text>
                   </TouchableOpacity>
                 )}
@@ -378,6 +373,23 @@ export default function App() {
             <Text style={styles.badgeText}>45{'\n'}DAYS</Text>
           </View>
         </View>
+
+        
+        {activeVideo && (
+          <View style={styles.videoModal}>
+            <Video
+              source={activeVideo}
+              style={styles.video}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              shouldPlay
+              isLooping
+            />
+            <TouchableOpacity style={styles.closeVideo} onPress={() => setActiveVideo(null)}>
+              <Text style={styles.closeVideoText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -467,4 +479,12 @@ const styles = StyleSheet.create({
   bannerText: { flex: 1, color: '#CBD5E1', fontSize: 13, lineHeight: 18, marginRight: 12 },
   badge: { backgroundColor: '#F59E0B', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, alignItems: 'center' },
   badgeText: { color: '#0A0E17', fontWeight: '800', fontSize: 12, textAlign: 'center' },
+  videoModal: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center', zIndex: 10,
+  },
+  video: { width: width * 0.9, height: width * 0.6, backgroundColor: '#000' },
+  closeVideo: { marginTop: 20, backgroundColor: '#3B82F6', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 10 },
+  closeVideoText: { color: '#fff', fontWeight: '700' },
+
 });
