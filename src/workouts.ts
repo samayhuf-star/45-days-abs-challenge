@@ -65,6 +65,11 @@ export function parseRestSeconds(rest: string): number {
   return match ? parseInt(match[1], 10) : 30;
 }
 
+export function parseDurationMinutes(duration: string): number {
+  const match = duration.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 export function estimateSets(exercises: string[]): number {
   let total = 0;
   for (const ex of exercises) {

@@ -1,6 +1,6 @@
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { EULA_URL, PRIVACY_URL, PRODUCT_IDS, TERMS_URL, type ProductId } from './products';
+import { EULA_URL, MANAGE_SUBSCRIPTIONS_URL, PRIVACY_URL, PRODUCT_IDS, TERMS_URL, type ProductId } from './products';
 import { useIapContext } from './IapProvider';
 
 type Props = {
@@ -11,21 +11,24 @@ type Props = {
   colors: { bg: string; card: string; text: string; sub: string; border: string };
 };
 
-const PLANS: { id: ProductId; name: string; detail: (price: string) => string }[] = [
+const PLANS: { id: ProductId; name: string; length: string; detail: (price: string) => string }[] = [
   {
     id: PRODUCT_IDS.monthly,
     name: 'Monthly',
-    detail: (price) => `7 days free, then ${price}/month`,
+    length: '1 month',
+    detail: (price) => `7-day free trial, then ${price} billed every month`,
   },
   {
     id: PRODUCT_IDS.yearly,
     name: 'Yearly',
-    detail: (price) => `7 days free, then ${price}/year`,
+    length: '1 year',
+    detail: (price) => `7-day free trial, then ${price} billed every year`,
   },
   {
     id: PRODUCT_IDS.lifetime,
     name: 'Lifetime',
-    detail: (price) => `${price}, one-time. No trial.`,
+    length: 'Does not renew',
+    detail: (price) => `${price} once. No trial and no renewal.`,
   },
 ];
 
@@ -34,7 +37,7 @@ export function Paywall({ visible, onClose, openLink, accent, colors }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View testID="paywall-screen" style={[styles.wrap, { backgroundColor: colors.bg }]}>
+      <ScrollView testID="paywall-screen" style={[styles.wrap, { backgroundColor: colors.bg }]} contentContainerStyle={styles.content}>
         <View style={styles.top}>
           <Text style={[styles.title, { color: colors.text }]}>Unlock Pro</Text>
           <TouchableOpacity testID="paywall-close" onPress={onClose} style={styles.closeBtn}>
@@ -42,7 +45,7 @@ export function Paywall({ visible, onClose, openLink, accent, colors }: Props) {
           </TouchableOpacity>
         </View>
         <Text style={[styles.lead, { color: colors.sub }]}>
-          Days 1 to 7 are free. Pro unlocks the rest of the 45-day plan, including later workouts and recovery days.
+          Days 1 to 7 are free. Pro unlocks days 8 to 45 of the plan, including later workouts and recovery days.
         </Text>
 
         {PLANS.map((plan) => {
@@ -60,6 +63,7 @@ export function Paywall({ visible, onClose, openLink, accent, colors }: Props) {
             >
               <View style={{ flex: 1 }}>
                 <Text style={[styles.planName, { color: colors.text }]}>{plan.name}</Text>
+                <Text style={[styles.planLength, { color: colors.text }]}>{plan.length}</Text>
                 <Text style={[styles.planDetail, { color: colors.sub }]}>{plan.detail(price)}</Text>
               </View>
               <Text style={[styles.planPrice, { color: accent }]}>{price}</Text>
@@ -67,26 +71,11 @@ export function Paywall({ visible, onClose, openLink, accent, colors }: Props) {
           );
         })}
 
-        <TouchableOpacity
-          testID="paywall-subscribe"
-          onPress={() => void iap.buy()}
-          disabled={iap.busy}
-          style={[styles.cta, { backgroundColor: accent, opacity: iap.busy ? 0.6 : 1 }]}
-        >
-          <Text style={styles.ctaText}>{iap.busy ? 'Please wait' : 'Continue'}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity testID="paywall-restore" onPress={() => void iap.restore()} disabled={iap.busy}>
-          <Text style={[styles.restore, { color: accent }]}>Restore Purchases</Text>
-        </TouchableOpacity>
-
-        {iap.message ? <Text style={[styles.message, { color: colors.text }]}>{iap.message}</Text> : null}
-
         <Text style={[styles.legal, { color: colors.sub }]}>
-          7 days free, then $2.99/month, or $19.99/year, after the trial. Lifetime is $39.99 with no trial. Cancel anytime.
-          Subscriptions renew automatically unless you cancel at least 24 hours before the period ends. Payment is charged to
-          your Apple Account at confirmation of purchase. Your account is charged for renewal within 24 hours before the
-          current period ends. Manage or cancel anytime in Settings, Apple Account, Subscriptions.
+          Monthly is $2.99 every month after a 7-day free trial. Yearly is $19.99 every year after a 7-day free trial.
+          Lifetime is $39.99 once, with no trial. A subscription renews automatically unless you cancel at least 24 hours
+          before the trial or the current period ends. Payment is charged to your Apple Account when you confirm the
+          purchase. The account is charged for renewal within 24 hours before the period ends.
         </Text>
 
         <View style={styles.links}>
@@ -102,13 +91,33 @@ export function Paywall({ visible, onClose, openLink, accent, colors }: Props) {
             <Text style={[styles.link, { color: accent }]}>Privacy Policy</Text>
           </TouchableOpacity>
         </View>
-      </View>
+
+        <TouchableOpacity
+          testID="paywall-subscribe"
+          onPress={() => void iap.buy()}
+          disabled={iap.busy}
+          style={[styles.cta, { backgroundColor: accent, opacity: iap.busy ? 0.6 : 1 }]}
+        >
+          <Text style={styles.ctaText}>{iap.busy ? 'Please wait' : 'Continue'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity testID="paywall-restore" onPress={() => void iap.restore()} disabled={iap.busy}>
+          <Text style={[styles.restore, { color: accent }]}>Restore Purchases</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity testID="paywall-manage" onPress={() => openLink(MANAGE_SUBSCRIPTIONS_URL)}>
+          <Text style={[styles.restore, { color: accent }]}>Manage Subscriptions</Text>
+        </TouchableOpacity>
+
+        {iap.message ? <Text style={[styles.message, { color: colors.text }]}>{iap.message}</Text> : null}
+      </ScrollView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, paddingHorizontal: 20, paddingTop: 20 },
+  wrap: { flex: 1 },
+  content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 32 },
   top: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   title: { flex: 1, fontSize: 26, fontWeight: '800' },
   closeBtn: { padding: 8 },
@@ -116,8 +125,9 @@ const styles = StyleSheet.create({
   lead: { fontSize: 14, lineHeight: 20, marginBottom: 16 },
   plan: { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderRadius: 14, padding: 14, marginBottom: 10 },
   planName: { fontSize: 17, fontWeight: '700' },
+  planLength: { fontSize: 13, fontWeight: '600', marginTop: 2 },
   planDetail: { fontSize: 13, marginTop: 4 },
-  planPrice: { fontSize: 18, fontWeight: '800', marginLeft: 12 },
+  planPrice: { fontSize: 22, fontWeight: '800', marginLeft: 12 },
   cta: { borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   ctaText: { color: '#fff', fontSize: 17, fontWeight: '700' },
   restore: { textAlign: 'center', fontSize: 16, fontWeight: '600', marginTop: 14, marginBottom: 8 },
