@@ -452,21 +452,21 @@ function AppInner() {
         </View>
 
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Nutrition for Core Definition</Text>
+        <View testID="nutrition-section" style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Nutrition Tips</Text>
           <Text style={[styles.nutritionIntro, { color: colors.sub }]}>
-            Training builds the muscle. Nutrition determines if it shows.
+            Training and everyday eating habits work together. These are general suggestions, not a personal meal plan.
           </Text>
-          <View style={[styles.nutritionCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Mild calorie deficit (300–500 kcal below maintenance)</Text>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Protein: 1.6–2.2g per kg body weight</Text>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Cut sugary drinks and liquid calories</Text>
+          <View testID="nutrition-card" style={[styles.nutritionCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• A modest calorie target that matches your energy needs, for example a little below maintenance if that is your goal (about 300 to 500 kcal)</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Include protein in your meals. Many active adults aim for about 1.6 to 2.2 g per kg of body weight</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Limit sugary drinks and liquid calories</Text>
             <Text style={[styles.nutritionTip, { color: colors.text }]}>• Prioritize whole foods and vegetables</Text>
             <Text style={[styles.nutritionTip, { color: colors.text }]}>• Manage sodium and stay hydrated</Text>
-            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Consistent sleep supports fat loss</Text>
+            <Text style={[styles.nutritionTip, { color: colors.text }]}>• Consistent sleep supports recovery</Text>
           </View>
           <Text style={[styles.nutritionNote, { color: colors.sub }]}>
-            Abs become more visible at lower body fat. Spot reduction does not work.
+            Results vary from person to person. This plan does not promise a particular look. Consult a professional if you are unsure.
           </Text>
         </View>
 
